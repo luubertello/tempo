@@ -5,7 +5,7 @@ import { join } from 'path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { CatalogoModule } from './catalogo/catalogo.module.js';
-import { EjercicioSchema } from './catalogo/infraestructura/ejercicio.schema.js';
+import { EjercicioSchema } from './catalogo/infrastructure/ejercicio.schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

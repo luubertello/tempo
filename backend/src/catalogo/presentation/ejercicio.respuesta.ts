@@ -1,4 +1,4 @@
-import { Ejercicio } from '../dominio/ejercicio.js';
+import { Ejercicio } from '../domain/ejercicio.js';
 
 export interface EjercicioRespuesta {
   id: string;

@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ListarEjerciciosCasoDeUso } from '../aplicacion/listar-ejercicios.caso-de-uso.js';
+import { ListarEjerciciosCasoDeUso } from '../application/listar-ejercicios.caso-de-uso.js';
 import { aRespuesta, EjercicioRespuesta } from './ejercicio.respuesta.js';
 
 @Controller('ejercicios')

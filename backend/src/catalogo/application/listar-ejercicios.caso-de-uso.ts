@@ -1,5 +1,5 @@
-import { Ejercicio } from "../dominio/ejercicio.js";
-import { EjercicioRepositorio } from '../dominio/ejercicio.repositorio.js';
+import { Ejercicio } from "../domain/ejercicio.js";
+import { EjercicioRepositorio } from '../domain/ejercicio.repositorio.js';
 
 // CU3. Sin decoradores de Nest: la capa de aplicación depende solo del dominio.
 export class ListarEjerciciosCasoDeUso {

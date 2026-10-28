@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ListarEjerciciosCasoDeUso } from './aplicacion/listar-ejercicios.caso-de-uso.js';
-import { EjercicioRepositorio } from './dominio/ejercicio.repositorio.js';
-import { EjercicioSchema } from './infraestructura/ejercicio.schema.js';
-import { EjercicioRepositorioTypeOrm } from './infraestructura/ejercicio.repositorio.typeorm.js';
+import { ListarEjerciciosCasoDeUso } from './application/listar-ejercicios.caso-de-uso.js';
+import { EjercicioRepositorio } from './domain/ejercicio.repositorio.js';
+import { EjercicioSchema } from './infrastructure/ejercicio.schema.js';
+import { EjercicioRepositorioTypeOrm } from './infrastructure/ejercicio.repositorio.typeorm.js';
 import { CatalogoController } from './presentacion/catalogo.controller.js';
 
 @Module({

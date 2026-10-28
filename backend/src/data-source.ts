@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import { join } from 'path';
-import { EjercicioSchema } from './catalogo/infraestructura/ejercicio.schema.js';
+import { EjercicioSchema } from './catalogo/infrastructure/ejercicio.schema.js';
 
 export default new DataSource({
   type: 'postgres',

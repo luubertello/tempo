@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Ejercicio } from '../dominio/ejercicio.js';
-import { EjercicioRepositorio } from '../dominio/ejercicio.repositorio.js';
-import { TipoMedicion } from '../dominio/tipo-medicion.js';
+import { Ejercicio } from '../domain/ejercicio.js';
+import { EjercicioRepositorio } from '../domain/ejercicio.repositorio.js';
+import { TipoMedicion } from '../domain/tipo-medicion.js';
 import { EjercicioFila, EjercicioSchema } from './ejercicio.schema.js';
 
 @Injectable()
