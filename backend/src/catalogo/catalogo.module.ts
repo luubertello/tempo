@@ -4,7 +4,7 @@ import { ListarEjerciciosCasoDeUso } from './application/listar-ejercicios.caso-
 import { EjercicioRepositorio } from './domain/ejercicio.repositorio.js';
 import { EjercicioSchema } from './infrastructure/ejercicio.schema.js';
 import { EjercicioRepositorioTypeOrm } from './infrastructure/ejercicio.repositorio.typeorm.js';
-import { CatalogoController } from './presentacion/catalogo.controller.js';
+import { CatalogoController } from './presentation/catalogo.controller.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([EjercicioSchema])],
