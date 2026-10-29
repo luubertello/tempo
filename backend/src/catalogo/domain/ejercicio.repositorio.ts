@@ -1,4 +1,4 @@
-import { Ejercicio } from "./ejercicio.js";
+import { Ejercicio } from "./ejercicio";
 
 // Puerto: el dominio define qué necesita; la infraestructura lo implementa.
 // Es clase abstracta para poder usarla como token de inyección sin tocar el dominio con decoradores.

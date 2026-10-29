@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Ejercicio } from '../domain/ejercicio.js';
-import { EjercicioRepositorio } from '../domain/ejercicio.repositorio.js';
-import { TipoMedicion } from '../domain/tipo-medicion.js';
-import { EjercicioFila, EjercicioSchema } from './ejercicio.schema.js';
+import { Ejercicio } from '../domain/ejercicio';
+import { EjercicioRepositorio } from '../domain/ejercicio.repositorio';
+import { TipoMedicion } from '../domain/tipo-medicion';
+import { EjercicioFila, EjercicioSchema } from './ejercicio.schema';
 
 @Injectable()
 export class EjercicioRepositorioTypeOrm extends EjercicioRepositorio {

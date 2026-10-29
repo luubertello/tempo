@@ -1,4 +1,4 @@
-import { TipoMedicion } from "./tipo-medicion.js";
+import { TipoMedicion } from "./tipo-medicion";
 
 // Ejercicio del catálogo: definido por la app, solo lectura.
 export class Ejercicio {

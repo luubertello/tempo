@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
-import { ListarEjerciciosCasoDeUso } from '../application/listar-ejercicios.caso-de-uso.js';
-import { aRespuesta, EjercicioRespuesta } from './ejercicio.respuesta.js';
+import { ListarEjerciciosCasoDeUso } from '../application/listar-ejercicios.caso-de-uso';
+import { aRespuesta, EjercicioRespuesta } from './ejercicio.respuesta';
 
 @Controller('ejercicios')
 export class CatalogoController {

@@ -2,13 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
-import { CatalogoModule } from './catalogo/catalogo.module.js';
-import { EjercicioSchema } from './catalogo/infrastructure/ejercicio.schema.js';
+import { CatalogoModule } from './catalogo/catalogo.module';
+import { IdentidadModule } from './identidad/identidad.module';
+import { ENTIDADES } from './entidades';
+import { CrearCatalogoEjercicios1793145600000 } from './shared/migrations/1793145600000-CrearCatalogoEjercicios';
+import { CrearUsuarios1793232000000 } from './shared/migrations/1793232000000-CrearUsuarios';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 @Module({
   imports: [
@@ -22,13 +21,14 @@ const __dirname = dirname(__filename);
         username: config.getOrThrow<string>('DB_USER'),
         password: config.getOrThrow<string>('DB_PASSWORD'),
         database: config.getOrThrow<string>('DB_NAME'),
-        entities: [EjercicioSchema],
-        migrations: [join(__dirname, 'compartido', 'migraciones', '*{.ts,.js}')],
+        entities: ENTIDADES,
+        migrations: [join(__dirname, 'shared', 'migrations', '*.{ts,js}')],
         migrationsRun: true,
         synchronize: false,
       }),
     }),
     CatalogoModule,
+    IdentidadModule
   ],
 })
 export class AppModule {}

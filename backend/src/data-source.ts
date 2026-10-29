@@ -1,7 +1,11 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config();
 import { DataSource } from 'typeorm';
+import { ENTIDADES } from './entidades';
 import { join } from 'path';
-import { EjercicioSchema } from './catalogo/infrastructure/ejercicio.schema.js';
+import { CrearCatalogoEjercicios1793145600000 } from './shared/migrations/1793145600000-CrearCatalogoEjercicios';
+import { CrearUsuarios1793232000000 } from './shared/migrations/1793232000000-CrearUsuarios';
+
 
 export default new DataSource({
   type: 'postgres',
@@ -10,6 +14,6 @@ export default new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [EjercicioSchema],
-  migrations: [join(__dirname, 'compartido', 'migraciones', '*{.ts,.js}')],
+  entities: ENTIDADES,
+  migrations: [join(__dirname, 'shared', 'migrations', '*.{ts,js}')],
 });
