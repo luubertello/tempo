@@ -1,0 +1,4 @@
+# ADR 0005: Entrenamiento consulta el catálogo por un puerto; sin FK entre contextos
+- Decisión: Entrenamiento define el puerto CatalogoDeEjercicios (solo id y tipo de medición); un adaptador lo implementa con el repositorio de Catálogo (relación Conformist). Las tablas de Entrenamiento no tienen claves foráneas hacia usuarios ni ejercicios.
+- Alternativas: importar el repositorio de Catálogo directo en los casos de uso (descartada: acopla la aplicación a otro contexto); FK a ejercicios y usuarios (descartada: acopla los esquemas y contradice "entre contextos solo por id").
+- Consecuencias: la integridad (R7) se valida en el dominio, no en la base; si el catálogo borrara un ejercicio, quedarían ids huérfanos (por eso el catálogo nunca borra).

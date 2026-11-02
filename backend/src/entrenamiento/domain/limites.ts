@@ -1,0 +1,9 @@
+// Límites provisorios 
+export const LIMITES = {
+  NOMBRE_MAX: 100,
+  EJERCICIOS_POR_RUTINA: 30,
+  SERIES_POR_EJERCICIO: 20,
+  REPETICIONES_MAX: 1000,
+  CARGA_MAX_KG: 1000,
+  DURACION_MAX_SEGUNDOS: 21600, // 6 horas
+} as const;

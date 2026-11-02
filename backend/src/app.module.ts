@@ -7,6 +7,7 @@ import { IdentidadModule } from './identidad/identidad.module';
 import { ENTIDADES } from './entidades';
 import { CrearCatalogoEjercicios1793145600000 } from './shared/migrations/1793145600000-CrearCatalogoEjercicios';
 import { CrearUsuarios1793232000000 } from './shared/migrations/1793232000000-CrearUsuarios';
+import { EntrenamientoModule } from './entrenamiento/entrenamiento.module';
 
 
 @Module({
@@ -28,7 +29,8 @@ import { CrearUsuarios1793232000000 } from './shared/migrations/1793232000000-Cr
       }),
     }),
     CatalogoModule,
-    IdentidadModule
+    IdentidadModule,
+    EntrenamientoModule
   ],
 })
 export class AppModule {}

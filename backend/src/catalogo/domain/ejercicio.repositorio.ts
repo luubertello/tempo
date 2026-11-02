@@ -5,4 +5,5 @@ import { Ejercicio } from "./ejercicio";
 export abstract class EjercicioRepositorio {
   abstract listar(): Promise<Ejercicio[]>;
   abstract buscarPorId(id: string): Promise<Ejercicio | null>;
+  abstract buscarPorIds(ids: string[]): Promise<Ejercicio[]>;
 }

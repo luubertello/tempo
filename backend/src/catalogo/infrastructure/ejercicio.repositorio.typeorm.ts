@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Ejercicio } from '../domain/ejercicio';
 import { EjercicioRepositorio } from '../domain/ejercicio.repositorio';
 import { TipoMedicion } from '../domain/tipo-medicion';
@@ -23,6 +23,12 @@ export class EjercicioRepositorioTypeOrm extends EjercicioRepositorio {
   async buscarPorId(id: string): Promise<Ejercicio | null> {
     const fila = await this.repo.findOneBy({ id });
     return fila ? this.aDominio(fila) : null;
+  }
+
+  async buscarPorIds(ids: string[]): Promise<Ejercicio[]> {
+    if (ids.length === 0) return [];
+    const filas = await this.repo.findBy({ id: In(ids) });
+    return filas.map(this.aDominio);
   }
 
   // Mapper fila -> dominio
