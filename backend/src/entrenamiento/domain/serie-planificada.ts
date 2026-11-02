@@ -1,5 +1,5 @@
 import { TipoMedicion } from '../../catalogo/domain/tipo-medicion';
-import { SerieIncoherente } from './errores';
+import { SerieIncoherente } from './errores-rutina';
 import { validarCarga, validarDuracion, validarRepeticiones } from './valores';
 
 export interface DatosSerie {

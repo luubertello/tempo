@@ -1,4 +1,4 @@
-import { RutinaNoEncontrada } from "../domain/errores";
+import { RutinaNoEncontrada } from "../domain/errores-rutina";
 import { RutinaRepositorio } from '../domain/rutina.repositorio';
 
 // CU9 - reglas: R8, R10

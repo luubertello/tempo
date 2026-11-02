@@ -1,4 +1,4 @@
-import { SerieIncoherente } from './errores';
+import { SerieIncoherente } from './errores-rutina';
 import { LIMITES } from './limites';
 
 export function validarRepeticiones(v: number): void {

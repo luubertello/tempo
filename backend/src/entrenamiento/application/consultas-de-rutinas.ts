@@ -1,4 +1,4 @@
-import { RutinaNoEncontrada } from '../domain/errores';
+import { RutinaNoEncontrada } from '../domain/errores-rutina';
 import { Rutina } from '../domain/rutina';
 import { RutinaRepositorio } from '../domain/rutina.repositorio';
 

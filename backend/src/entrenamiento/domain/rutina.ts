@@ -7,7 +7,7 @@ import {
   RutinaNoEncontrada,
   RutinaPredefinidaNoModificable,
   RutinaSinEjercicios,
-} from './errores';
+} from './errores-rutina';
 import { LIMITES } from './limites';
 import { OrigenRutina } from './origen-rutina';
 import { DatosSerie, SeriePlanificada } from './serie-planificada';

@@ -1,5 +1,5 @@
 import { CatalogoDeEjercicios } from '../domain/catalogo-de-ejercicios';
-import { RutinaNoEncontrada } from '../domain/errores';
+import { RutinaNoEncontrada } from '../domain/errores-rutina';
 import { DatosEjercicio, Rutina } from '../domain/rutina';
 import { RutinaRepositorio } from '../domain/rutina.repositorio';
 

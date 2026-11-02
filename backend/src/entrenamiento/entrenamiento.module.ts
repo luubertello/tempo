@@ -1,36 +1,83 @@
-import { Module } from '@nestjs/common';
+import { Module, Provider } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EjercicioRepositorio } from '../catalogo/domain/ejercicio.repositorio';
 import { CatalogoModule } from '../catalogo/catalogo.module';
+import { EjercicioRepositorio } from '../catalogo/domain/ejercicio.repositorio';
 import { ListarMisRutinasCasoDeUso, ListarRutinasPredefinidasCasoDeUso, VerRutinaCasoDeUso } from './application/consultas-de-rutinas';
+import { VerSesionCasoDeUso, VerSesionEnCursoCasoDeUso } from './application/consultas-de-sesiones';
 import { CrearRutinaCasoDeUso } from './application/crear-rutina.caso-de-uso';
 import { EliminarRutinaCasoDeUso } from './application/eliminar-rutina.caso-de-uso';
+import { IniciarSesionCasoDeUso } from './application/iniciar-sesion.caso-de-uso';
 import { ModificarRutinaCasoDeUso } from './application/modificar-rutina.caso-de-uso';
+import {
+  AbandonarSesionCasoDeUso,
+  AgregarEjercicioASesionCasoDeUso,
+  FinalizarSesionCasoDeUso,
+  OmitirEjercicioCasoDeUso,
+  RegistrarSerieCasoDeUso,
+} from './application/operaciones-de-sesion';
 import { UsarRutinaPredefinidaCasoDeUso } from './application/usar-rutina-predefinida.caso-de-uso';
 import { CatalogoDeEjercicios } from './domain/catalogo-de-ejercicios';
+import { Reloj } from './domain/reloj';
 import { RutinaRepositorio } from './domain/rutina.repositorio';
+import { SesionRepositorio } from './domain/sesion.repositorio';
 import { CatalogoAdaptador } from './infrastructure/catalogo.adaptador';
+import { RelojSistema } from './infrastructure/reloj.sistema';
 import { RutinaRepositorioTypeOrm } from './infrastructure/rutina.repositorio.typeorm';
 import { RutinaEjercicioSchema, RutinaSchema, RutinaSerieSchema } from './infrastructure/rutina.schemas';
+import { SesionRepositorioTypeOrm } from './infrastructure/sesion.repositorio.typeorm';
+import { SesionEjercicioSchema, SesionSchema, SesionSerieSchema } from './infrastructure/sesion.schemas';
 import { RutinasController } from './presentation/rutinas.controller';
+import { SesionesController } from './presentation/sesiones.controller';
+
+const caso = <T>(clase: new (...args: any[]) => T, ...dependencias: unknown[]): Provider => ({
+  provide: clase,
+  useFactory: (...deps: any[]) => new clase(...deps),
+  inject: dependencias as any[],
+});
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RutinaSchema, RutinaEjercicioSchema, RutinaSerieSchema]), CatalogoModule],
-  controllers: [RutinasController],
+  imports: [
+    TypeOrmModule.forFeature([
+      RutinaSchema, RutinaEjercicioSchema, RutinaSerieSchema,
+      SesionSchema, SesionEjercicioSchema, SesionSerieSchema,
+    ]),
+    CatalogoModule,
+  ],
+  controllers: [RutinasController, SesionesController],
   providers: [
     { provide: RutinaRepositorio, useClass: RutinaRepositorioTypeOrm },
+    { provide: SesionRepositorio, useClass: SesionRepositorioTypeOrm },
     {
       provide: CatalogoDeEjercicios,
       useFactory: (e: EjercicioRepositorio) => new CatalogoAdaptador(e),
       inject: [EjercicioRepositorio],
     },
-    { provide: ListarRutinasPredefinidasCasoDeUso, useFactory: (r: RutinaRepositorio) => new ListarRutinasPredefinidasCasoDeUso(r), inject: [RutinaRepositorio] },
-    { provide: ListarMisRutinasCasoDeUso, useFactory: (r: RutinaRepositorio) => new ListarMisRutinasCasoDeUso(r), inject: [RutinaRepositorio] },
-    { provide: VerRutinaCasoDeUso, useFactory: (r: RutinaRepositorio) => new VerRutinaCasoDeUso(r), inject: [RutinaRepositorio] },
-    { provide: EliminarRutinaCasoDeUso, useFactory: (r: RutinaRepositorio) => new EliminarRutinaCasoDeUso(r), inject: [RutinaRepositorio] },
-    { provide: UsarRutinaPredefinidaCasoDeUso, useFactory: (r: RutinaRepositorio) => new UsarRutinaPredefinidaCasoDeUso(r), inject: [RutinaRepositorio] },
-    { provide: CrearRutinaCasoDeUso, useFactory: (r: RutinaRepositorio, c: CatalogoDeEjercicios) => new CrearRutinaCasoDeUso(r, c), inject: [RutinaRepositorio, CatalogoDeEjercicios] },
-    { provide: ModificarRutinaCasoDeUso, useFactory: (r: RutinaRepositorio, c: CatalogoDeEjercicios) => new ModificarRutinaCasoDeUso(r, c), inject: [RutinaRepositorio, CatalogoDeEjercicios] },
+    {
+      provide: Reloj,
+      useFactory: (c: ConfigService) =>
+        new RelojSistema(c.get<string>('ZONA_HORARIA') ?? 'America/Argentina/Buenos_Aires'),
+      inject: [ConfigService],
+    },
+
+    // Rutinas
+    caso(ListarRutinasPredefinidasCasoDeUso, RutinaRepositorio),
+    caso(ListarMisRutinasCasoDeUso, RutinaRepositorio),
+    caso(VerRutinaCasoDeUso, RutinaRepositorio),
+    caso(EliminarRutinaCasoDeUso, RutinaRepositorio),
+    caso(UsarRutinaPredefinidaCasoDeUso, RutinaRepositorio),
+    caso(CrearRutinaCasoDeUso, RutinaRepositorio, CatalogoDeEjercicios),
+    caso(ModificarRutinaCasoDeUso, RutinaRepositorio, CatalogoDeEjercicios),
+
+    // Sesiones
+    caso(IniciarSesionCasoDeUso, SesionRepositorio, RutinaRepositorio, Reloj),
+    caso(AgregarEjercicioASesionCasoDeUso, SesionRepositorio, CatalogoDeEjercicios),
+    caso(RegistrarSerieCasoDeUso, SesionRepositorio, CatalogoDeEjercicios),
+    caso(OmitirEjercicioCasoDeUso, SesionRepositorio),
+    caso(FinalizarSesionCasoDeUso, SesionRepositorio),
+    caso(AbandonarSesionCasoDeUso, SesionRepositorio),
+    caso(VerSesionCasoDeUso, SesionRepositorio),
+    caso(VerSesionEnCursoCasoDeUso, SesionRepositorio),
   ],
 })
 export class EntrenamientoModule {}
