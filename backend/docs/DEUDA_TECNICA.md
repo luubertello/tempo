@@ -9,6 +9,9 @@
 | sin offline-first, solo guardado progresivo | mvp, sincronizar es mucho laburo | si en el uso real del gimnasio no hay señal y se vuelve un problema |
 | seed de rutinas predefinidas busca los ejercicios por nombre | los ids del catálogo se generan al crear la base | si el catálogo se carga por otro lado, pasar a ids fijos |
 | límites de valores provisorios (30 ejercicios, 20 series, 1000 reps, 1000 kg, 6 h) | decisión pendiente del paso 12 | al definirlos bien, están todos en `limites.ts` |
+| el publicador de sesiones finalizadas carga las sesiones completas y filtra en memoria | simplicidad (adr 0011) | si el historial de un usuario crece mucho: hacer una consulta sql directa que solo traiga lo necesario |
+| estadísticas se recalcula entero en cada pedido, sin caché | volumen bajo, y así nunca queda desactualizado | si tarda: caché que se invalide al cambiar una sesión |
+| el resumen y la evolución no tienen paginación | volumen bajo | junto con la paginación del historial |
 
 ## concurrencia
 

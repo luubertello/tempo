@@ -38,6 +38,8 @@ import {
   QuitarSerieCasoDeUso,
   RegistrarSesionPasadaCasoDeUso,
 } from './application/historial-y-correcciones';
+import { PublicadorDeSesionesFinalizadas } from './application/publicar-sesiones-finalizadas';
+import { SesionesFinalizadas } from './published/sesiones-finalizadas';
 
 const caso = <T>(clase: new (...args: any[]) => T, ...dependencias: unknown[]): Provider => ({
   provide: clase,
@@ -68,6 +70,11 @@ const caso = <T>(clase: new (...args: any[]) => T, ...dependencias: unknown[]): 
         new RelojSistema(c.get<string>('ZONA_HORARIA') ?? 'America/Argentina/Buenos_Aires'),
       inject: [ConfigService],
     },
+        {
+      provide: SesionesFinalizadas,
+      useFactory: (s: SesionRepositorio) => new PublicadorDeSesionesFinalizadas(s),
+      inject: [SesionRepositorio],
+    },
 
     // Rutinas
     caso(ListarRutinasPredefinidasCasoDeUso, RutinaRepositorio),
@@ -95,5 +102,6 @@ const caso = <T>(clase: new (...args: any[]) => T, ...dependencias: unknown[]): 
     caso(EliminarSesionCasoDeUso, SesionRepositorio),
     caso(ListarHistorialCasoDeUso, SesionRepositorio),
   ],
+  exports: [SesionesFinalizadas],
 })
 export class EntrenamientoModule {}

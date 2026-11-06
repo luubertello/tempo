@@ -9,6 +9,8 @@ import { FiltroSesiones, SesionRepositorio } from '../domain/sesion.repositorio'
 import { DatosSerie } from '../domain/serie-planificada';
 import { SerieRealizada } from '../domain/serie-realizada';
 import { cargarSesionDe } from './cargar-sesion';
+import { esFechaReal } from '../domain/valores';
+import { FechaInvalida } from '../domain/errores-sesion';
 
 export class RegistrarSesionPasadaCasoDeUso {
   constructor(
@@ -113,7 +115,10 @@ export class EliminarSesionCasoDeUso {
 export class ListarHistorialCasoDeUso {
   constructor(private readonly sesiones: SesionRepositorio) {}
 
-  ejecutar(e: { usuarioId: string; filtro: FiltroSesiones }): Promise<Sesion[]> {
+  async ejecutar(e: { usuarioId: string; filtro: FiltroSesiones }): Promise<Sesion[]> {
+    for (const f of [e.filtro.desde, e.filtro.hasta]) {
+      if (f !== undefined && !esFechaReal(f)) throw new FechaInvalida();
+    }
     return this.sesiones.listar(e.usuarioId, e.filtro);
   }
 }

@@ -97,3 +97,35 @@ todo lo que el código cambió o definió y que falta pasar al pdf, ordenado por
 
 **código implementado**
 - ahora están todos los casos de uso de sesión: cu11 a cu22. falta estadísticas.
+
+## estadísticas
+
+**paso 4 (mapa de contextos)**
+- catálogo → estadísticas ahora cruza nombre y tipo de medición (antes: "solo mostrar"). sigue siendo conformist. hay que cambiar la etiqueta de esa flecha en el diagrama y el párrafo de relaciones.
+- entrenamiento → estadísticas: el ohs es el servicio `SesionesFinalizadas` y el pl es el formato de sesión finalizada (fecha + ejercicios con sus series completadas). ya implementado (adr 0011).
+
+**glosario**
+- "marca máxima": mayor valor de la métrica de un ejercicio en una serie completada. con carga = kg, peso corporal = repeticiones, tiempo = segundos. "carga máxima" es el caso de los ejercicios con carga.
+- "unidad": kg, reps o seg, según el tipo de medición del ejercicio.
+- "punto de evolución": la marca máxima de un ejercicio en una fecha de sesión.
+- "evolución": serie de puntos de un ejercicio, de la fecha más vieja a la más nueva (reemplaza la definición anterior, que hablaba solo de cargas).
+
+**paso 8 (reglas)**
+- r26 (modificada): marca máxima de un ejercicio = mayor valor de su métrica (carga, repeticiones o duración, según su tipo de medición) en una serie completada, entre todas las sesiones finalizadas, en cualquier posición dentro de la sesión.
+- r31 (nueva): la evolución de un ejercicio tiene un punto por fecha de sesión, con la marca máxima de ese día (si hubo dos sesiones el mismo día se juntan). va ordenada de la más vieja a la más nueva.
+- r25, r27 y r28 sin cambios.
+
+**paso 9 (casos de uso)**
+- cu23: la salida pasa a ser ejercicio, nombre, unidad, veces realizado y marca máxima.
+- cu24: la salida pasa a ser ejercicio, nombre, unidad y puntos (fecha de sesión, valor). reglas: r25, r26, r28, r31.
+
+**paso 11 (contrato)**
+- `GET /api/estadisticas/ejercicios`: 200 `[{ ejercicio_id, nombre, unidad, veces_realizado, marca_maxima }]`, más veces primero y después por nombre. solo ejercicios hechos al menos una vez. reemplaza `carga_maxima` (que era nula para ejercicios sin carga).
+- `GET /api/estadisticas/ejercicios/:ejercicio_id/evolucion?desde=&hasta=`: 200 `{ ejercicio_id, nombre, unidad, puntos: [{ fecha_sesion, valor }] }` (antes era un array). errores: 400 (id o fecha con mal formato), 404 (ejercicio inexistente), 422 (fecha que no existe o desde posterior a hasta). un ejercicio que existe pero nunca se hizo da 200 con `puntos` vacío.
+- `GET /api/sesiones?desde=&hasta=`: una fecha con formato correcto pero que no existe (2026-02-31) da 422 (se detectó al hacer estadísticas).
+
+**paso 12**
+- decisión tomada: evolución para ejercicios sin carga = cada tipo tiene su métrica (adr 0012). reemplaza el supuesto de "devolver vacío".
+
+**código implementado**
+- cu23 y cu24. con esto el back cubre todos los casos de uso (cu1 a cu24).

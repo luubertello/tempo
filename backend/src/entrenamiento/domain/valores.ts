@@ -21,9 +21,13 @@ export function validarDuracion(v: number): void {
   }
 }
 
+export function esFechaReal(fecha: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false;
+  const d = new Date(`${fecha}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === fecha;
+}
+
 export function validarFechaSesion(fecha: string, hoy: string): void {
-  const formatoOk = /^\d{4}-\d{2}-\d{2}$/.test(fecha);
-  const real = formatoOk && new Date(`${fecha}T00:00:00Z`).toISOString().slice(0, 10) === fecha;
-  if (!real) throw new FechaInvalida();
+  if (!esFechaReal(fecha)) throw new FechaInvalida();
   if (fecha > hoy) throw new FechaFutura();
 }
