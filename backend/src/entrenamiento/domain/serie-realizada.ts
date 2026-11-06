@@ -64,6 +64,36 @@ export class SerieRealizada {
     return new SerieRealizada(orden, true, v.repeticiones, v.carga, v.duracionSegundos, null);
   }
 
+  static crear(
+    orden: number,
+    completada: boolean,
+    tipo: TipoMedicion,
+    datos: DatosSerie,
+    objetivo: Objetivo | null,
+  ): SerieRealizada {
+    if (!completada) {
+      SerieRealizada.asegurarSinValores(datos);
+      return new SerieRealizada(orden, false, null, null, null, objetivo);
+    }
+    const v = validarReales(tipo, datos);
+    return new SerieRealizada(orden, true, v.repeticiones, v.carga, v.duracionSegundos, objetivo);
+  }
+
+  marcarNoHecha(datos: DatosSerie): SerieRealizada {
+    SerieRealizada.asegurarSinValores(datos);
+    return this.sinValores();
+  }
+
+  conOrden(orden: number): SerieRealizada {
+    return new SerieRealizada(orden, this.completada, this.repeticiones, this.carga, this.duracionSegundos, this.objetivo);
+  }
+
+  private static asegurarSinValores(d: DatosSerie): void {
+    if (d.repeticiones != null || d.carga != null || d.duracionSegundos != null) {
+      throw new SerieIncoherente('Una serie no completada no puede tener valores reales.');
+    }
+  }
+
   static reconstruir(
     orden: number,
     completada: boolean,

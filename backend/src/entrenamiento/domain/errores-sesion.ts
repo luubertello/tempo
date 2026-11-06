@@ -51,3 +51,33 @@ export class EjercicioSinSeriesEnSesion extends ErrorDeReglaViolada {
     super(`El ejercicio ${orden} de la sesión no tiene series.`);
   }
 }
+
+export class FechaInvalida extends ErrorDeReglaViolada {
+  constructor() {
+    super('La fecha no es válida. Usá el formato AAAA-MM-DD.');
+  }
+}
+
+export class FechaFutura extends ErrorDeReglaViolada {
+  constructor() {
+    super('La fecha de la sesión no puede ser futura.');
+  }
+}
+
+export class SesionAbandonadaNoCorregible extends ErrorDeConflicto {
+  constructor() {
+    super('Una sesión abandonada no se puede corregir. Si no la querés, eliminala.');
+  }
+}
+
+export class SesionFinalizadaSinSeries extends ErrorDeReglaViolada {
+  constructor() {
+    super('Una sesión finalizada necesita al menos una serie completada. Si no querés conservarla, eliminala.');
+  }
+}
+
+export class SerieNoEncontrada extends ErrorNoEncontrado {
+  constructor() {
+    super('La serie no está en el ejercicio.');
+  }
+}

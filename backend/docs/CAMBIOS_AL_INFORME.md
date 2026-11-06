@@ -75,3 +75,25 @@ todo lo que el código cambió o definió y que falta pasar al pdf, ordenado por
 - entrenamiento, rutinas: cu4 a cu10, con tres rutinas predefinidas de ejemplo en la migración.
 - entrenamiento, sesiones: cu11, cu13, cu14, cu15, cu17, cu18, cu20 y cu22.
 - falta: cu12, cu16, cu19, cu21 y todo estadísticas.
+
+## segunda entrega de sesión
+
+**paso 8 (reglas)**
+- r13 para sesiones pasadas: la fecha tiene que ser menor o igual a hoy en la zona `ZONA_HORARIA` (reemplaza el supuesto del "día de tolerancia"). una fecha que no existe (2026-02-31) da 422.
+- r22 y r19 se vuelven a chequear en cada corrección de una sesión finalizada: si la corrección las rompe, 422 y no se guarda.
+- r23: se corrigen las sesiones en curso y finalizadas; la abandonada no (409).
+- r12 para sesión pasada con rutina: el objetivo se copia por posición (adr 0010).
+
+**paso 11 (contrato)**
+- `POST /api/sesiones/pasadas`: cada serie puede llevar `completada` (opcional, por defecto true). una serie con `completada: false` no lleva valores. `omitido` es opcional (por defecto false). si trae `rutina_id`, el servidor copia el objetivo por posición.
+- `PATCH /api/sesiones/:id/ejercicios/:orden/series/:serie`: acepta `completada` opcional; con false marca la serie como no hecha. responde 200 con la serie. errores: 404, 409 (abandonada), 422.
+- `DELETE .../ejercicios/:orden` y `DELETE .../series/:serie`: renumeran los que quedan. errores: 404, 409 (abandonada), 422 (r19, r22).
+- `PATCH /api/sesiones/:id`: errores 404, 409 (abandonada), 422 (fecha futura o inexistente), 400 (formato).
+- `GET /api/sesiones`: devuelve un resumen por sesión: `{ id, rutina_id, nombre_rutina, fecha_sesion, fecha_registro, estado, cantidad_ejercicios, series_completadas }`, más reciente primero. filtros inválidos dan 400.
+- `DELETE /api/sesiones/:id`: sirve para cualquier estado. 204; 404 si no existe o es ajena.
+
+**paso 12**
+- decidido: sin paginación del historial por ahora (deuda técnica).
+
+**código implementado**
+- ahora están todos los casos de uso de sesión: cu11 a cu22. falta estadísticas.

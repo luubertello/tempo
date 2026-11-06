@@ -1,5 +1,5 @@
 import { TipoMedicion } from '../../catalogo/domain/tipo-medicion';
-import { EjercicioSinSeriesEnSesion } from './errores-sesion';
+import { EjercicioSinSeriesEnSesion, SerieNoEncontrada } from './errores-sesion';
 import { LimiteExcedido } from './errores-rutina';
 import { LIMITES } from './limites';
 import { DatosSerie } from './serie-planificada';
@@ -57,6 +57,23 @@ export class EjercicioRealizado {
     }
     this._omitido = false; 
     return serie;
+  }
+
+  corregirSerie(ordenSerie: number, tipo: TipoMedicion, completada: boolean, datos: DatosSerie): SerieRealizada {
+    const i = this._series.findIndex((s) => s.orden === ordenSerie);
+    if (i < 0) throw new SerieNoEncontrada();
+    const nueva = completada ? this._series[i].completar(tipo, datos) : this._series[i].marcarNoHecha(datos);
+    this._series[i] = nueva;
+    if (completada) this._omitido = false; 
+    return nueva;
+  }
+
+
+  quitarSerie(ordenSerie: number): void {
+    const i = this._series.findIndex((s) => s.orden === ordenSerie);
+    if (i < 0) throw new SerieNoEncontrada();
+    this._series.splice(i, 1);
+    this._series = this._series.map((s, k) => s.conOrden(k + 1));
   }
 
   omitir(): void {

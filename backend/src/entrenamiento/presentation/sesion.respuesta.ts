@@ -34,3 +34,14 @@ export const aRespuestaSesion = (s: Sesion) => ({
   estado: s.estado,
   ejercicios: s.ejercicios.map(aRespuestaEjercicio),
 });
+
+export const aResumenSesion = (s: Sesion) => ({
+  id: s.id,
+  rutina_id: s.rutinaId,
+  nombre_rutina: s.nombreRutina,
+  fecha_sesion: s.fechaSesion,
+  fecha_registro: s.fechaRegistro.toISOString(),
+  estado: s.estado,
+  cantidad_ejercicios: s.ejercicios.length,
+  series_completadas: s.cantidadSeriesCompletadas(),
+});

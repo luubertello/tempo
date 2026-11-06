@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, In, QueryFailedError } from 'typeorm';
+import { Between, DataSource, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, QueryFailedError } from 'typeorm';
 import { EjercicioRealizado } from '../domain/ejercicio-realizado';
 import { SesionEnCursoExistente } from '../domain/errores-sesion';
 import { EstadoSesion } from '../domain/estado-sesion';
 import { Sesion } from '../domain/sesion';
-import { SesionRepositorio } from '../domain/sesion.repositorio';
+import { SesionRepositorio, FiltroSesiones } from '../domain/sesion.repositorio';
 import { SerieRealizada } from '../domain/serie-realizada';
 import {
   SesionEjercicioFila,
@@ -33,6 +33,22 @@ export class SesionRepositorioTypeOrm extends SesionRepositorio {
       .getRepository<SesionFila>(SesionSchema)
       .findOneBy({ usuarioId, estado: EstadoSesion.EN_CURSO });
     return fila ? (await this.armar([fila]))[0] : null;
+  }
+    async listar(usuarioId: string, f: FiltroSesiones): Promise<Sesion[]> {
+    const where: FindOptionsWhere<SesionFila> = { usuarioId };
+    if (f.estado) where.estado = f.estado;
+    if (f.desde && f.hasta) where.fechaSesion = Between(f.desde, f.hasta);
+    else if (f.desde) where.fechaSesion = MoreThanOrEqual(f.desde);
+    else if (f.hasta) where.fechaSesion = LessThanOrEqual(f.hasta);
+
+    const filas = await this.ds
+      .getRepository<SesionFila>(SesionSchema)
+      .find({ where, order: { fechaSesion: 'DESC', fechaRegistro: 'DESC' } });
+    return this.armar(filas); 
+  }
+
+  async eliminar(id: string): Promise<void> {
+    await this.ds.getRepository<SesionFila>(SesionSchema).delete({ id });
   }
 
   async guardar(s: Sesion): Promise<void> {

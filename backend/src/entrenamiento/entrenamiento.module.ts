@@ -29,6 +29,15 @@ import { SesionRepositorioTypeOrm } from './infrastructure/sesion.repositorio.ty
 import { SesionEjercicioSchema, SesionSchema, SesionSerieSchema } from './infrastructure/sesion.schemas';
 import { RutinasController } from './presentation/rutinas.controller';
 import { SesionesController } from './presentation/sesiones.controller';
+import {
+  CambiarFechaDeSesionCasoDeUso,
+  CorregirSerieCasoDeUso,
+  EliminarSesionCasoDeUso,
+  ListarHistorialCasoDeUso,
+  QuitarEjercicioCasoDeUso,
+  QuitarSerieCasoDeUso,
+  RegistrarSesionPasadaCasoDeUso,
+} from './application/historial-y-correcciones';
 
 const caso = <T>(clase: new (...args: any[]) => T, ...dependencias: unknown[]): Provider => ({
   provide: clase,
@@ -78,6 +87,13 @@ const caso = <T>(clase: new (...args: any[]) => T, ...dependencias: unknown[]): 
     caso(AbandonarSesionCasoDeUso, SesionRepositorio),
     caso(VerSesionCasoDeUso, SesionRepositorio),
     caso(VerSesionEnCursoCasoDeUso, SesionRepositorio),
+    caso(RegistrarSesionPasadaCasoDeUso, SesionRepositorio, RutinaRepositorio, CatalogoDeEjercicios, Reloj),
+    caso(CorregirSerieCasoDeUso, SesionRepositorio, CatalogoDeEjercicios),
+    caso(QuitarSerieCasoDeUso, SesionRepositorio),
+    caso(QuitarEjercicioCasoDeUso, SesionRepositorio),
+    caso(CambiarFechaDeSesionCasoDeUso, SesionRepositorio, Reloj),
+    caso(EliminarSesionCasoDeUso, SesionRepositorio),
+    caso(ListarHistorialCasoDeUso, SesionRepositorio),
   ],
 })
 export class EntrenamientoModule {}
