@@ -2,8 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { API_URL } from '../config/entorno';
-import { OrigenRutina, Rutina } from '../models/rutina.model';
-
+import { DatosRutina, OrigenRutina, Rutina } from '../models/rutina.model';
 interface RutinaApi {
   id: string;
   nombre: string;
@@ -31,6 +30,18 @@ const aRutina = (r: RutinaApi): Rutina => ({
   })),
 });
 
+const aCuerpo = (d: DatosRutina) => ({
+  nombre: d.nombre,
+  ejercicios: d.ejercicios.map((e) => ({
+    ejercicio_id: e.ejercicioId,
+    series: e.series.map((s) => ({
+      repeticiones: s.repeticiones,
+      carga: s.carga,
+      duracion_segundos: s.duracionSegundos,
+    })),
+  })),
+});
+
 @Injectable({ providedIn: 'root' })
 export class RutinasService {
   private readonly http = inject(HttpClient);
@@ -46,6 +57,14 @@ export class RutinasService {
 
   ver(id: string): Observable<Rutina> {
     return this.http.get<RutinaApi>(`${this.base}/${id}`).pipe(map(aRutina));
+  }
+  
+  crear(datos: DatosRutina): Observable<Rutina> {
+    return this.http.post<RutinaApi>(this.base, aCuerpo(datos)).pipe(map(aRutina));
+  }
+
+  modificar(id: string, datos: DatosRutina): Observable<Rutina> {
+    return this.http.put<RutinaApi>(`${this.base}/${id}`, aCuerpo(datos)).pipe(map(aRutina));
   }
 
   usar(id: string): Observable<Rutina> {

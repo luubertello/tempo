@@ -1,6 +1,9 @@
 <ion-content [fullscreen]="true">
   <main class="pantalla">
-    <h1>Rutinas</h1>
+    <div class="titulo">
+      <h1>Rutinas</h1>
+      <ion-button class="nueva" size="small" routerLink="/rutinas/nueva">Nueva rutina</ion-button>
+    </div>
 
     <ion-segment mode="md" [value]="segmento()" (ionChange)="cambiarSegmento($event)">
       <ion-segment-button value="mias"><ion-label>Mías</ion-label></ion-segment-button>
@@ -17,7 +20,8 @@
     } @else if (visibles().length === 0) {
       <div class="aviso">
         @if (segmento() === 'mias') {
-          <p>Todavía no tenés rutinas propias. Usá una predefinida para empezar.</p>
+          <p>Todavía no tenés rutinas propias. Creá una o usá una predefinida.</p>
+          <ion-button fill="clear" routerLink="/rutinas/nueva">Nueva rutina</ion-button>
           <ion-button fill="clear" (click)="segmento.set('predefinidas')">Ver predefinidas</ion-button>
         } @else {
           <p>No hay rutinas predefinidas disponibles.</p>

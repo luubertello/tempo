@@ -19,3 +19,14 @@ export interface Rutina {
   origen: OrigenRutina;
   ejercicios: EjercicioDeRutina[];
 }
+
+export interface DatosSerie {
+  repeticiones?: number;
+  carga?: number;
+  duracionSegundos?: number;
+}
+
+export interface DatosRutina {
+  nombre: string;
+  ejercicios: { ejercicioId: string; series: DatosSerie[] }[];
+}

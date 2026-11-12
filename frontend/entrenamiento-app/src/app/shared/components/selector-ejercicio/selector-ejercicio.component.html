@@ -1,0 +1,34 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Elegí un ejercicio</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar placeholder="Buscar ejercicio" (ionInput)="buscar($event)" />
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (error()) {
+    <div class="aviso error" role="alert"><p>{{ error() }}</p></div>
+  } @else if (cargando()) {
+    <ion-spinner class="cargando" name="dots" />
+  } @else if (filtrados().length === 0) {
+    <div class="aviso"><p>Ningún ejercicio coincide con “{{ busqueda() }}”.</p></div>
+  } @else {
+    <ul class="filas">
+      @for (e of filtrados(); track e.id) {
+        <li>
+          <button type="button" class="fila" (click)="elegir(e)">
+            <span class="datos">
+              <span class="nombre">{{ e.nombre }}</span>
+              <span class="detalle">{{ etiquetaTipo(e.tipoMedicion) }}</span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</ion-content>

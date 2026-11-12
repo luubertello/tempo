@@ -1,0 +1,28 @@
+@use '../../styles/pantalla';
+
+ion-toolbar {
+  --background: transparent;
+}
+
+ion-searchbar {
+  --background: var(--tempo-superficie);
+  --border-radius: var(--tempo-radio-control);
+  --box-shadow: none;
+}
+
+.filas {
+  padding: 0 1.25rem;
+}
+
+.fila {
+  width: 100%;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.aviso {
+  padding: 0 1.25rem;
+}

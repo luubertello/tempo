@@ -1,0 +1,119 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="volverA" text="Volver" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="pantalla">
+    <h1>{{ esEdicion ? 'Editar rutina' : 'Nueva rutina' }}</h1>
+
+    @if (errorCarga()) {
+      <div class="aviso error" role="alert"><p>{{ errorCarga() }}</p></div>
+    } @else if (listo()) {
+      <ion-input
+        label="Nombre"
+        labelPlacement="stacked"
+        fill="outline"
+        placeholder="Por ejemplo, Piernas"
+        maxlength="100"
+        [value]="nombre()"
+        (ionInput)="nombre.set(valorDe($event))"
+      />
+
+      @if (ejercicios().length === 0) {
+        <p class="vacio">Todavía no agregaste ejercicios.</p>
+      }
+
+      <ol class="ejercicios">
+        @for (e of ejercicios(); track $index; let i = $index; let primero = $first; let ultimo = $last) {
+          @let modo = modoDe(e.ejercicioId);
+          <li class="ejercicio">
+            <div class="cabecera">
+              <span class="orden">{{ i + 1 }}</span>
+              <div class="titulo-ejercicio">
+                <h2>{{ nombreDe(e.ejercicioId) }}</h2>
+                <span class="detalle">{{ etiquetaDe(e.ejercicioId) }}</span>
+              </div>
+              <div class="herramientas">
+                <ion-button fill="clear" size="small" aria-label="Subir ejercicio" [disabled]="primero" (click)="mover(i, -1)">
+                  <ion-icon slot="icon-only" name="chevron-up-outline" />
+                </ion-button>
+                <ion-button fill="clear" size="small" aria-label="Bajar ejercicio" [disabled]="ultimo" (click)="mover(i, 1)">
+                  <ion-icon slot="icon-only" name="chevron-down-outline" />
+                </ion-button>
+                <ion-button fill="clear" size="small" aria-label="Quitar ejercicio" (click)="quitarEjercicio(i)">
+                  <ion-icon slot="icon-only" name="trash-outline" />
+                </ion-button>
+              </div>
+            </div>
+
+            <div class="series" [class.dos-campos]="modo === 'conCarga'">
+              <div class="encabezado">
+                <span>Serie</span>
+                @switch (modo) {
+                  @case ('conCarga') {
+                    <span>Reps</span>
+                    <span>Carga (kg)</span>
+                  }
+                  @case ('reps') {
+                    <span>Reps</span>
+                  }
+                  @case ('tiempo') {
+                    <span>Duración (seg)</span>
+                  }
+                }
+                <span></span>
+              </div>
+
+              @for (s of e.series; track $index; let j = $index) {
+                <div class="serie">
+                  <span class="num">{{ j + 1 }}</span>
+                  @switch (modo) {
+                    @case ('conCarga') {
+                      <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Repeticiones"
+                        [value]="s.repeticiones" (ionInput)="cambiar(i, j, 'repeticiones', $event)" />
+                      <ion-input type="number" inputmode="decimal" fill="outline" aria-label="Carga en kilos" placeholder="Opcional"
+                        [value]="s.carga" (ionInput)="cambiar(i, j, 'carga', $event)" />
+                    }
+                    @case ('reps') {
+                      <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Repeticiones"
+                        [value]="s.repeticiones" (ionInput)="cambiar(i, j, 'repeticiones', $event)" />
+                    }
+                    @case ('tiempo') {
+                      <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Duración en segundos"
+                        [value]="s.duracion" (ionInput)="cambiar(i, j, 'duracion', $event)" />
+                    }
+                  }
+                  <ion-button fill="clear" size="small" aria-label="Quitar serie" [disabled]="e.series.length === 1" (click)="quitarSerie(i, j)">
+                    <ion-icon slot="icon-only" name="close-outline" />
+                  </ion-button>
+                </div>
+              }
+            </div>
+
+            <ion-button class="secundario" fill="clear" size="small" (click)="agregarSerie(i)">Agregar serie</ion-button>
+          </li>
+        }
+      </ol>
+
+      <ion-button class="agregar" fill="outline" expand="block" (click)="elegirEjercicio()">Agregar ejercicio</ion-button>
+
+      @if (error()) {
+        <p class="error-accion" role="alert">{{ error() }}</p>
+      }
+
+      <ion-button class="principal" expand="block" [disabled]="guardando()" (click)="guardar()">
+        @if (guardando()) {
+          <ion-spinner name="dots" />
+        } @else {
+          Guardar rutina
+        }
+      </ion-button>
+    } @else {
+      <ion-spinner class="cargando" name="dots" />
+    }
+  </main>
+</ion-content>

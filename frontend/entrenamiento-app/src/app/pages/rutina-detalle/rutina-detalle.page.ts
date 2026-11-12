@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   AlertController,
   IonBackButton,
@@ -22,7 +22,7 @@ import { plural, textoSerie } from '../../core/utils/formato';
   selector: 'app-rutina-detalle',
   templateUrl: './rutina-detalle.page.html',
   styleUrl: './rutina-detalle.page.scss',
-  imports: [IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonButton, IonSpinner],
+  imports: [IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonButton, IonSpinner, RouterLink],
 })
 export class RutinaDetallePage {
   private readonly rutinas = inject(RutinasService);

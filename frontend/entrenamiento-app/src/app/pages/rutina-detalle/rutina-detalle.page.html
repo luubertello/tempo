@@ -46,6 +46,9 @@
             Usar esta rutina
           </ion-button>
         } @else {
+          <ion-button class="principal" expand="block" [routerLink]="['/rutinas', r.id, 'editar']">
+            Editar rutina
+          </ion-button>
           <ion-button class="eliminar" fill="clear" [disabled]="trabajando()" (click)="confirmarEliminar()">
             Eliminar rutina
           </ion-button>

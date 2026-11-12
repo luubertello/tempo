@@ -1,4 +1,5 @@
 import { SerieDeRutina } from '../models/rutina.model';
+import { TipoMedicion } from '../models/ejercicio.model';
 
 export const plural = (n: number, singular: string, plural: string): string =>
   `${n} ${n === 1 ? singular : plural}`;
@@ -15,3 +16,15 @@ export function textoSerie(s: SerieDeRutina): string {
   if (s.repeticiones !== null && s.carga !== null) return `${s.repeticiones} × ${s.carga.toLocaleString('es-AR')} kg`;
   return `${s.repeticiones} reps`;
 }
+
+const ETIQUETAS_TIPO: Record<TipoMedicion, string> = {
+  REPETICIONES_CON_CARGA: 'Repeticiones con carga',
+  REPETICIONES_PESO_CORPORAL: 'Peso corporal',
+  TIEMPO: 'Tiempo',
+};
+export const etiquetaTipo = (tipo: TipoMedicion): string => ETIQUETAS_TIPO[tipo];
+
+export const valorDe = (ev: Event): string => String((ev as CustomEvent).detail?.value ?? '');
+
+export const normalizar = (s: string): string =>
+  s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();

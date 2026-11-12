@@ -19,6 +19,8 @@ export const routes: Routes = [
     children: [
       { path: 'entrenar', data: { titulo: 'Entrenar' }, loadComponent: () => import('./pages/pronto/pronto.page').then((m) => m.ProntoPage) },
       { path: 'rutinas', loadComponent: () => import('./pages/rutinas/rutinas.page').then((m) => m.RutinasPage) },
+      { path: 'rutinas/nueva', loadComponent: () => import('./pages/rutina-form/rutina-form.page').then((m) => m.RutinaFormPage) },
+      { path: 'rutinas/:id/editar', loadComponent: () => import('./pages/rutina-form/rutina-form.page').then((m) => m.RutinaFormPage) },
       { path: 'rutinas/:id', loadComponent: () => import('./pages/rutina-detalle/rutina-detalle.page').then((m) => m.RutinaDetallePage) },
       { path: 'historial', data: { titulo: 'Historial' }, loadComponent: () => import('./pages/pronto/pronto.page').then((m) => m.ProntoPage) },
       { path: 'progreso', data: { titulo: 'Progreso' }, loadComponent: () => import('./pages/pronto/pronto.page').then((m) => m.ProntoPage) },
