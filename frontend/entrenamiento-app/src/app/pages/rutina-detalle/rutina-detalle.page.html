@@ -1,0 +1,58 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/rutinas" text="Rutinas" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="pantalla">
+    @if (error()) {
+      <div class="aviso error" role="alert"><p>{{ error() }}</p></div>
+    } @else if (rutina(); as r) {
+      <h1>{{ r.nombre }}</h1>
+      <p class="intro">
+        @if (esPredefinida()) {
+          Rutina predefinida. Usala para crear una copia propia que puedas editar.
+        } @else {
+          {{ resumen(r) }}
+        }
+      </p>
+
+      <ol class="ejercicios">
+        @for (e of r.ejercicios; track e.orden) {
+          <li class="ejercicio">
+            <span class="orden">{{ e.orden }}</span>
+            <div class="cuerpo">
+              <h2>{{ nombreDe(e.ejercicioId) }}</h2>
+              <ul class="series">
+                @for (s of e.series; track s.orden) {
+                  <li>{{ textoSerie(s) }}</li>
+                }
+              </ul>
+            </div>
+          </li>
+        }
+      </ol>
+
+      @if (errorAccion()) {
+        <p class="error-accion" role="alert">{{ errorAccion() }}</p>
+      }
+
+      <div class="acciones">
+        @if (esPredefinida()) {
+          <ion-button class="principal" expand="block" [disabled]="trabajando()" (click)="usar()">
+            Usar esta rutina
+          </ion-button>
+        } @else {
+          <ion-button class="eliminar" fill="clear" [disabled]="trabajando()" (click)="confirmarEliminar()">
+            Eliminar rutina
+          </ion-button>
+        }
+      </div>
+    } @else {
+      <ion-spinner class="cargando" name="dots" />
+    }
+  </main>
+</ion-content>

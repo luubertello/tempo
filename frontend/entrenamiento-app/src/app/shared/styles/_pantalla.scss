@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.pantalla {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 2rem;
+}
+
+h1 {
+  margin: 0 0 1.25rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.cargando {
+  display: block;
+  margin: 3rem auto;
+  color: var(--tempo-acento);
+}
+
+.aviso {
+  margin-top: 1.5rem;
+  color: var(--tempo-tinta-suave);
+
+  p {
+    margin: 0 0 0.25rem;
+  }
+
+  &.error p {
+    color: var(--tempo-error);
+  }
+
+  ion-button {
+    --color: var(--tempo-acento);
+    margin-left: -0.75rem;
+  }
+}
+
+.filas {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+
+  li + li {
+    border-top: 1px solid var(--tempo-linea);
+  }
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.nombre {
+  font-family: var(--tempo-fuente-titulo);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.detalle {
+  color: var(--tempo-tinta-suave);
+  font-size: 0.9rem;
+}
+
+ion-button.principal {
+  --background: var(--tempo-acento);
+  --color: var(--tempo-acento-sobre);
+  --border-radius: var(--tempo-radio-control);
+  height: 3.25rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}

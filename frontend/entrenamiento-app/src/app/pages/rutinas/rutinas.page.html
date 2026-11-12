@@ -1,0 +1,42 @@
+<ion-content [fullscreen]="true">
+  <main class="pantalla">
+    <h1>Rutinas</h1>
+
+    <ion-segment mode="md" [value]="segmento()" (ionChange)="cambiarSegmento($event)">
+      <ion-segment-button value="mias"><ion-label>Mías</ion-label></ion-segment-button>
+      <ion-segment-button value="predefinidas"><ion-label>Predefinidas</ion-label></ion-segment-button>
+    </ion-segment>
+
+    @if (error()) {
+      <div class="aviso error" role="alert">
+        <p>{{ error() }}</p>
+        <ion-button fill="clear" (click)="cargar()">Reintentar</ion-button>
+      </div>
+    } @else if (cargando() && visibles().length === 0) {
+      <ion-spinner class="cargando" name="dots" />
+    } @else if (visibles().length === 0) {
+      <div class="aviso">
+        @if (segmento() === 'mias') {
+          <p>Todavía no tenés rutinas propias. Usá una predefinida para empezar.</p>
+          <ion-button fill="clear" (click)="segmento.set('predefinidas')">Ver predefinidas</ion-button>
+        } @else {
+          <p>No hay rutinas predefinidas disponibles.</p>
+        }
+      </div>
+    } @else {
+      <ul class="filas">
+        @for (r of visibles(); track r.id) {
+          <li>
+            <a class="fila" [routerLink]="['/rutinas', r.id]">
+              <span class="datos">
+                <span class="nombre">{{ r.nombre }}</span>
+                <span class="detalle">{{ resumen(r) }}</span>
+              </span>
+              <app-compas [total]="totalSeries(r)" />
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </main>
+</ion-content>

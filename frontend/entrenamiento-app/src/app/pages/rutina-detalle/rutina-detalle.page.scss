@@ -1,0 +1,84 @@
+@use '../../shared/styles/pantalla';
+
+ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: var(--tempo-acento);
+}
+
+.pantalla {
+  padding-top: 0.5rem;
+}
+
+.intro {
+  margin: -0.5rem 0 1.75rem;
+  color: var(--tempo-tinta-suave);
+  max-width: 32rem;
+}
+
+.ejercicios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ejercicio {
+  display: flex;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--tempo-linea);
+
+  &:last-child {
+    border-bottom: 1px solid var(--tempo-linea);
+  }
+}
+
+.orden {
+  flex: 0 0 1.25rem;
+  font-family: var(--tempo-fuente-titulo);
+  font-weight: 700;
+  color: var(--tempo-tinta-suave);
+}
+
+.cuerpo {
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+}
+
+.series {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--tempo-linea);
+    border-radius: 8px;
+    background: var(--tempo-superficie);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.error-accion {
+  margin: 1.25rem 0 0;
+  color: var(--tempo-error);
+  font-size: 0.9rem;
+}
+
+.acciones {
+  margin-top: 1.75rem;
+}
+
+ion-button.eliminar {
+  --color: var(--tempo-error);
+  margin-left: -0.75rem;
+}
