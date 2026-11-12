@@ -1,0 +1,192 @@
+@use '../../shared/styles/pantalla';
+
+.pantalla {
+  padding-bottom: 4rem;
+}
+
+.encabezado-sesion {
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+}
+
+.subtitulo {
+  margin: 2rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--tempo-tinta-suave);
+}
+
+.logro {
+  margin: -0.5rem 0 1.25rem;
+  color: var(--tempo-acento);
+  font-weight: 600;
+}
+
+.vacio {
+  margin: 0 0 1.5rem;
+  color: var(--tempo-tinta-suave);
+}
+
+button.fila {
+  width: 100%;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+// ---- ejercicios ----
+
+.ejercicios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ejercicio {
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--tempo-linea);
+
+  &:last-child {
+    border-bottom: 1px solid var(--tempo-linea);
+  }
+
+  &.omitido .titulo-ejercicio h2 {
+    color: var(--tempo-tinta-suave);
+  }
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.orden {
+  flex: 0 0 1.25rem;
+  font-family: var(--tempo-fuente-titulo);
+  font-weight: 700;
+  color: var(--tempo-tinta-suave);
+}
+
+.titulo-ejercicio {
+  flex: 1;
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+}
+
+// ---- series ----
+
+.serie {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-variant-numeric: tabular-nums;
+
+  &.pendiente {
+    color: var(--tempo-tinta-suave);
+  }
+
+  &.entrada {
+    align-items: start;
+    padding: 0.6rem 0;
+  }
+}
+
+.num {
+  color: var(--tempo-tinta-suave);
+  font-weight: 600;
+}
+
+.valor {
+  font-weight: 600;
+}
+
+.serie.pendiente .valor {
+  font-weight: 400;
+}
+
+.nota {
+  margin-left: 0.5rem;
+  color: var(--tempo-tinta-suave);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.entrada-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  .nota {
+    margin-left: 0;
+  }
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+
+  &.dos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+ion-input {
+  --background: var(--tempo-superficie);
+  --border-color: var(--tempo-linea);
+  --border-radius: var(--tempo-radio-control);
+  --highlight-color-focused: var(--tempo-acento);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  min-height: 52px;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+ion-button.registrar {
+  --background: var(--tempo-acento);
+  --color: var(--tempo-acento-sobre);
+  --border-radius: var(--tempo-radio-control);
+  height: 2.75rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+ion-button.omitir {
+  --color: var(--tempo-tinta-suave);
+  margin-left: -0.5rem;
+}
+
+ion-button.agregar {
+  --color: var(--tempo-acento);
+  --border-color: var(--tempo-acento);
+  --border-radius: var(--tempo-radio-control);
+  height: 3rem;
+  margin: 1.5rem 0 1rem;
+  font-weight: 600;
+}
+
+ion-button.abandonar {
+  --color: var(--tempo-error);
+  margin: 0.5rem 0 0 -0.75rem;
+}
+
+.error-accion {
+  margin: 0 0 1rem;
+  color: var(--tempo-error);
+  font-size: 0.9rem;
+}

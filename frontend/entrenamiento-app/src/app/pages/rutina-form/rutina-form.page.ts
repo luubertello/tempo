@@ -23,6 +23,7 @@ import { RutinasService } from '../../core/services/rutinas.service';
 import { mensajeDeError } from '../../core/utils/errores';
 import { etiquetaTipo, valorDe } from '../../core/utils/formato';
 import { SelectorEjercicioComponent } from '../../shared/components/selector-ejercicio/selector-ejercicio.component';
+import { decimal, entero } from '../../core/utils/validaciones';
 
 type Modo = 'conCarga' | 'reps' | 'tiempo';
 
@@ -37,19 +38,6 @@ interface EjercicioBorrador {
 }
 
 const serieVacia = (): SerieBorrador => ({ repeticiones: '', carga: '', duracion: '' });
-
-function entero(texto: string, min: number, max: number): number | null {
-  if (!/^\d+$/.test(texto.trim())) return null;
-  const n = Number(texto);
-  return n >= min && n <= max ? n : null;
-}
-
-function decimal(texto: string, max: number): number | null {
-  const t = texto.trim().replace(',', '.');
-  if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
-  const n = Number(t);
-  return n > 0 && n <= max ? n : null;
-}
 
 @Component({
   selector: 'app-rutina-form',

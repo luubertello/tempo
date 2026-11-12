@@ -17,7 +17,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/tabs/tabs.page').then((m) => m.TabsPage),
     children: [
-      { path: 'entrenar', data: { titulo: 'Entrenar' }, loadComponent: () => import('./pages/pronto/pronto.page').then((m) => m.ProntoPage) },
+            { path: 'entrenar', loadComponent: () => import('./pages/entrenar/entrenar.page').then((m) => m.EntrenarPage) },
       { path: 'rutinas', loadComponent: () => import('./pages/rutinas/rutinas.page').then((m) => m.RutinasPage) },
       { path: 'rutinas/nueva', loadComponent: () => import('./pages/rutina-form/rutina-form.page').then((m) => m.RutinaFormPage) },
       { path: 'rutinas/:id/editar', loadComponent: () => import('./pages/rutina-form/rutina-form.page').then((m) => m.RutinaFormPage) },

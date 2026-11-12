@@ -1,0 +1,182 @@
+<ion-content [fullscreen]="true">
+  <main class="pantalla">
+    @if (errorCarga()) {
+      <div class="aviso error" role="alert">
+        <p>{{ errorCarga() }}</p>
+        <ion-button fill="clear" (click)="cargar()">Reintentar</ion-button>
+      </div>
+    } @else if (cargando() && !sesion() && rutinas().length === 0) {
+      <ion-spinner class="cargando" name="dots" />
+    } @else if (sesion(); as s) {
+      <!-- Entrenamiento en curso -->
+      <div class="encabezado-sesion">
+        <h1>{{ titulo() }}</h1>
+        <span class="detalle">{{ fecha() }}</span>
+      </div>
+
+      @if (s.ejercicios.length === 0) {
+        <p class="vacio">Agregá el primer ejercicio para empezar a registrar.</p>
+      }
+
+      <ol class="ejercicios">
+        @for (e of s.ejercicios; track e.orden) {
+          @let modo = modoDe(e.ejercicioId);
+          @let b = borradores()[e.orden];
+          <li class="ejercicio" [class.omitido]="e.omitido">
+            <div class="cabecera">
+              <span class="orden">{{ e.orden }}</span>
+              <div class="titulo-ejercicio">
+                <h2>{{ nombreDe(e.ejercicioId) }}</h2>
+                <span class="detalle">{{ detalleDe(e) }}</span>
+              </div>
+              @if (e.series.length > 0) {
+                <app-compas [total]="e.series.length" [hechas]="hechas(e)" />
+              }
+            </div>
+
+            <div class="series">
+              @for (f of filas(e); track f.orden) {
+                @switch (f.tipo) {
+                  @case ('hecha') {
+                    <div class="serie">
+                      <span class="num">{{ f.orden }}</span>
+                      <span class="valor">
+                        {{ textoSerie(f.serie!) }}
+                        @if (f.serie!.objetivo && difiere(f.serie!)) {
+                          <span class="nota">objetivo {{ textoSerie(f.serie!.objetivo) }}</span>
+                        }
+                      </span>
+                    </div>
+                  }
+                  @case ('pendiente') {
+                    <div class="serie pendiente">
+                      <span class="num">{{ f.orden }}</span>
+                      <span class="valor">
+                        @if (f.serie?.objetivo; as o) {
+                          {{ textoSerie(o) }}
+                        } @else {
+                          Pendiente
+                        }
+                      </span>
+                    </div>
+                  }
+                  @case ('entrada') {
+                    <div class="serie entrada">
+                      <span class="num">{{ f.orden }}</span>
+                      <div class="entrada-cuerpo">
+                        <div class="campos" [class.dos]="modo === 'conCarga'">
+                          @switch (modo) {
+                            @case ('conCarga') {
+                              <ion-input type="number" inputmode="numeric" label="Reps" labelPlacement="stacked" fill="outline"
+                                [value]="b?.repeticiones" (ionInput)="cambiar(e.orden, 'repeticiones', $event)" />
+                              <ion-input type="number" inputmode="decimal" label="Carga (kg)" labelPlacement="stacked" fill="outline"
+                                [value]="b?.carga" (ionInput)="cambiar(e.orden, 'carga', $event)" />
+                            }
+                            @case ('reps') {
+                              <ion-input type="number" inputmode="numeric" label="Reps" labelPlacement="stacked" fill="outline"
+                                [value]="b?.repeticiones" (ionInput)="cambiar(e.orden, 'repeticiones', $event)" />
+                            }
+                            @case ('tiempo') {
+                              <ion-input type="number" inputmode="numeric" label="Duración (seg)" labelPlacement="stacked" fill="outline"
+                                [value]="b?.duracion" (ionInput)="cambiar(e.orden, 'duracion', $event)" />
+                            }
+                          }
+                        </div>
+
+                        @if (f.serie?.objetivo; as o) {
+                          <span class="nota">Objetivo: {{ textoSerie(o) }}</span>
+                        } @else if (e.series.length > 0) {
+                          <span class="nota">Serie extra, fuera del plan.</span>
+                        }
+
+                        <ion-button class="registrar" expand="block" [disabled]="registrando() !== null"
+                          (click)="registrar(e)">
+                          @if (registrando() === e.orden) {
+                            <ion-spinner name="dots" />
+                          } @else {
+                            Registrar serie {{ f.orden }}
+                          }
+                        </ion-button>
+
+                        @if (errorSerie()?.orden === e.orden) {
+                          <p class="error-accion" role="alert">{{ errorSerie()?.mensaje }}</p>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+
+            @if (e.series.length > 0 && !e.omitido) {
+              <ion-button class="omitir" fill="clear" size="small" [disabled]="trabajando()" (click)="omitir(e)">
+                Omitir ejercicio
+              </ion-button>
+            }
+          </li>
+        }
+      </ol>
+
+      <ion-button class="agregar" fill="outline" expand="block" [disabled]="trabajando()" (click)="agregarEjercicio()">
+        Agregar ejercicio
+      </ion-button>
+
+      @if (error()) {
+        <p class="error-accion" role="alert">{{ error() }}</p>
+      }
+
+      <ion-button class="principal" expand="block" [disabled]="trabajando()" (click)="finalizar()">
+        Finalizar entrenamiento
+      </ion-button>
+      <ion-button class="abandonar" fill="clear" [disabled]="trabajando()" (click)="confirmarAbandonar()">
+        Abandonar entrenamiento
+      </ion-button>
+    } @else {
+      <!-- Sin entrenamiento en curso -->
+      <h1>Entrenar</h1>
+
+      @if (terminado()) {
+        <p class="logro" role="status">{{ terminado() }}</p>
+      }
+
+      <ion-button class="principal" expand="block" [disabled]="iniciando() !== null" (click)="iniciar()">
+        @if (iniciando() === 'libre') {
+          <ion-spinner name="dots" />
+        } @else {
+          Empezar sin rutina
+        }
+      </ion-button>
+
+      @if (error()) {
+        <p class="error-accion" role="alert">{{ error() }}</p>
+      }
+
+      <h2 class="subtitulo">O empezá con una de tus rutinas</h2>
+
+      @if (rutinas().length === 0) {
+        <div class="aviso">
+          <p>Todavía no tenés rutinas propias. Creá una o usá una predefinida.</p>
+          <ion-button fill="clear" routerLink="/rutinas">Ir a Rutinas</ion-button>
+        </div>
+      } @else {
+        <ul class="filas">
+          @for (r of rutinas(); track r.id) {
+            <li>
+              <button type="button" class="fila" [disabled]="iniciando() !== null" (click)="iniciar(r.id)">
+                <span class="datos">
+                  <span class="nombre">{{ r.nombre }}</span>
+                  <span class="detalle">{{ resumenRutina(r) }}</span>
+                </span>
+                @if (iniciando() === r.id) {
+                  <ion-spinner name="dots" />
+                } @else {
+                  <app-compas [total]="totalSeries(r)" />
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </main>
+</ion-content>
