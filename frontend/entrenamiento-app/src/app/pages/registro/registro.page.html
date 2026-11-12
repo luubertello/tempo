@@ -1,0 +1,41 @@
+<ion-content [fullscreen]="true">
+  <main class="auth">
+    <app-marca />
+
+    <h1>Creá tu cuenta y empezá a registrar.</h1>
+
+    <form class="campos" [formGroup]="form" (ngSubmit)="crearCuenta()" novalidate>
+      <ion-input
+        type="email"
+        formControlName="email"
+        label="Email"
+        labelPlacement="stacked"
+        fill="outline"
+        autocomplete="email"
+        inputmode="email"
+      />
+      <ion-input
+        type="password"
+        formControlName="password"
+        label="Contraseña (de 8 a 72 caracteres)"
+        labelPlacement="stacked"
+        fill="outline"
+        autocomplete="new-password"
+      />
+
+      @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
+      }
+
+      <ion-button class="principal" type="submit" expand="block" [disabled]="enviando()">
+        @if (enviando()) {
+          <ion-spinner name="dots" />
+        } @else {
+          Crear cuenta
+        }
+      </ion-button>
+    </form>
+
+    <p class="alterno">¿Ya tenés cuenta? <a routerLink="/login">Entrar</a></p>
+  </main>
+</ion-content>

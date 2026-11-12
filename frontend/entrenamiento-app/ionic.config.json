@@ -1,0 +1,7 @@
+{
+  "name": "entrenamiento-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

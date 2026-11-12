@@ -1,0 +1,53 @@
+:root {
+  // Identidad de Tempo
+  --tempo-papel: #eef0f3;
+  --tempo-superficie: #ffffff;
+  --tempo-tinta: #16202f;
+  --tempo-tinta-suave: #5a6578;
+  --tempo-linea: #d8dce3;
+  --tempo-acento: #2440ff;
+  --tempo-acento-sobre: #ffffff;
+  --tempo-ok: #0f8a5f;
+  --tempo-aviso: #b7791f;
+  --tempo-error: #c4372f;
+
+  --tempo-fuente-titulo: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --tempo-fuente: 'Instrument Sans Variable', system-ui, sans-serif;
+  --tempo-radio-control: 12px;
+  --tempo-radio-hoja: 20px;
+
+  // Conexión con Ionic
+  --ion-font-family: var(--tempo-fuente);
+  --ion-background-color: var(--tempo-papel);
+  --ion-text-color: var(--tempo-tinta);
+  --ion-border-color: var(--tempo-linea);
+
+  --ion-color-primary: #2440ff;
+  --ion-color-primary-rgb: 36, 64, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #2039e0;
+  --ion-color-primary-tint: #3a54ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tempo-papel: #0d1320;
+    --tempo-superficie: #151c2c;
+    --tempo-tinta: #e8ecf4;
+    --tempo-tinta-suave: #97a2b8;
+    --tempo-linea: #28324a;
+    --tempo-acento: #7b8fff;
+    --tempo-acento-sobre: #0b1020;
+    --tempo-ok: #3fc593;
+    --tempo-aviso: #e0a94a;
+    --tempo-error: #ff7a70;
+
+    --ion-color-primary: #7b8fff;
+    --ion-color-primary-rgb: 123, 143, 255;
+    --ion-color-primary-contrast: #0b1020;
+    --ion-color-primary-contrast-rgb: 11, 16, 32;
+    --ion-color-primary-shade: #6c7ee0;
+    --ion-color-primary-tint: #8a9cff;
+  }
+}

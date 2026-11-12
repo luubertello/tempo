@@ -1,0 +1,59 @@
+:host {
+  display: inline-block;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  color: var(--tempo-tinta);
+  font-family: var(--tempo-fuente-titulo);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.compas {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.2em;
+  height: 0.85em;
+  padding-bottom: 0.06em;
+}
+
+.marca-serie {
+  width: 0.2em;
+  height: 100%;
+  border: 0.07em solid var(--tempo-acento);
+  border-radius: 0.06em;
+  box-sizing: border-box;
+
+  &.hecha {
+    background: var(--tempo-acento);
+  }
+}
+
+.marca.grande {
+  font-size: 3.5rem;
+}
+
+.marca.animado .marca-serie.hecha {
+  animation: llenar 0.45s ease-out both;
+  animation-delay: calc(var(--i) * 170ms + 250ms);
+}
+
+@keyframes llenar {
+  from {
+    background: transparent;
+  }
+  to {
+    background: var(--tempo-acento);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marca.animado .marca-serie.hecha {
+    animation: none;
+  }
+}

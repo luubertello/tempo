@@ -5,6 +5,7 @@ import { FiltroDeErrores } from './shared/presentation/filtro-de-errores';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({ origin: true });
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new FiltroDeErrores());
   app.useGlobalPipes(

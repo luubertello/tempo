@@ -1,0 +1,8 @@
+<span class="marca" [class.grande]="grande()" [class.animado]="animado()" aria-label="tempo">
+  <span class="palabra">tempo</span>
+  <span class="compas" aria-hidden="true">
+    @for (i of marcas; track i) {
+      <span class="marca-serie" [class.hecha]="i < hechas" [style.--i]="i"></span>
+    }
+  </span>
+</span>

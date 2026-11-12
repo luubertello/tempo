@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.auth {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  min-height: 100dvh;
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 2.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(2rem, 8vw, 2.5rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.campos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+ion-input {
+  --background: var(--tempo-superficie);
+  --border-color: var(--tempo-linea);
+  --border-radius: var(--tempo-radio-control);
+  --highlight-color-focused: var(--tempo-acento);
+  --padding-start: 14px;
+  --padding-end: 14px;
+}
+
+.error {
+  margin: 0;
+  color: var(--tempo-error);
+  font-size: 0.9rem;
+}
+
+ion-button.principal {
+  --background: var(--tempo-acento);
+  --color: var(--tempo-acento-sobre);
+  --border-radius: var(--tempo-radio-control);
+  height: 3.25rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.alterno {
+  margin: 0;
+  text-align: center;
+  color: var(--tempo-tinta-suave);
+
+  a {
+    color: var(--tempo-acento);
+    font-weight: 600;
+    text-decoration: none;
+  }
+}

@@ -1,0 +1,41 @@
+<ion-content [fullscreen]="true">
+  <main class="auth">
+    <app-marca [grande]="true" [animado]="true" />
+
+    <h1>Lo que planeaste, contra lo que hiciste.</h1>
+
+    <form class="campos" [formGroup]="form" (ngSubmit)="entrar()" novalidate>
+      <ion-input
+        type="email"
+        formControlName="email"
+        label="Email"
+        labelPlacement="stacked"
+        fill="outline"
+        autocomplete="email"
+        inputmode="email"
+      />
+      <ion-input
+        type="password"
+        formControlName="password"
+        label="Contraseña"
+        labelPlacement="stacked"
+        fill="outline"
+        autocomplete="current-password"
+      />
+
+      @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
+      }
+
+      <ion-button class="principal" type="submit" expand="block" [disabled]="enviando()">
+        @if (enviando()) {
+          <ion-spinner name="dots" />
+        } @else {
+          Entrar
+        }
+      </ion-button>
+    </form>
+
+    <p class="alterno">¿Todavía no tenés cuenta? <a routerLink="/registro">Crear cuenta</a></p>
+  </main>
+</ion-content>
