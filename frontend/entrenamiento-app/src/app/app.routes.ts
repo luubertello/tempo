@@ -23,6 +23,7 @@ export const routes: Routes = [
       { path: 'rutinas/:id/editar', loadComponent: () => import('./pages/rutina-form/rutina-form.page').then((m) => m.RutinaFormPage) },
       { path: 'rutinas/:id', loadComponent: () => import('./pages/rutina-detalle/rutina-detalle.page').then((m) => m.RutinaDetallePage) },
       { path: 'historial', loadComponent: () => import('./pages/historial/historial.page').then((m) => m.HistorialPage) },
+      { path: 'historial/nuevo', loadComponent: () => import('./pages/sesion-pasada-form/sesion-pasada-form.page').then((m) => m.SesionPasadaFormPage) },
       { path: 'historial/:id', loadComponent: () => import('./pages/historial-detalle/historial-detalle.page').then((m) => m.HistorialDetallePage) },
       { path: 'progreso', loadComponent: () => import('./pages/progreso/progreso.page').then((m) => m.ProgresoPage) },
       { path: 'progreso/:id', loadComponent: () => import('./pages/progreso-detalle/progreso-detalle.page').then((m) => m.ProgresoDetallePage) },

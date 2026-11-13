@@ -21,3 +21,23 @@ ion-segment-button {
     color: var(--tempo-acento);
   }
 }
+
+.titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+ion-button.nueva {
+  --background: var(--tempo-acento);
+  --color: var(--tempo-acento-sobre);
+  --border-radius: var(--tempo-radio-control);
+  margin: 0;
+  font-weight: 600;
+}

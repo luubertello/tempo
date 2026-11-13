@@ -1,6 +1,9 @@
 <ion-content [fullscreen]="true">
   <main class="pantalla">
-    <h1>Historial</h1>
+    <div class="titulo">
+      <h1>Historial</h1>
+      <ion-button class="nueva" size="small" routerLink="/historial/nuevo">Cargar otro día</ion-button>
+    </div>
 
     <ion-segment mode="md" [value]="filtro()" (ionChange)="cambiarFiltro($event)">
       <ion-segment-button value="todos"><ion-label>Todos</ion-label></ion-segment-button>
@@ -20,6 +23,7 @@
         @if (filtro() === 'todos') {
           <p>Todavía no registraste entrenamientos. Cuando finalices uno, aparece acá.</p>
           <ion-button fill="clear" routerLink="/entrenar">Ir a Entrenar</ion-button>
+          <ion-button fill="clear" routerLink="/historial/nuevo">Cargar un día pasado</ion-button>
         } @else {
           <p>No hay entrenamientos con este filtro.</p>
         }

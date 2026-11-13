@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { API_URL } from '../config/entorno';
 import { DatosSerie } from '../models/rutina.model';
-import { EstadoSesion, ObjetivoSerie, ResultadoEjercicio, ResumenSesion, Sesion } from '../models/sesion.model';
+import { DatosSesionPasada, EstadoSesion, ObjetivoSerie, ResultadoEjercicio, ResumenSesion, Sesion } from '../models/sesion.model';
 interface ObjetivoApi {
   repeticiones: number | null;
   carga: number | null;
@@ -86,6 +86,25 @@ export class SesionesService {
 
   iniciar(rutinaId?: string): Observable<Sesion> {
     return this.http.post<SesionApi>(this.base, rutinaId ? { rutina_id: rutinaId } : {}).pipe(map(aSesion));
+  }
+
+  registrarPasada(d: DatosSesionPasada): Observable<Sesion> {
+    return this.http
+      .post<SesionApi>(`${this.base}/pasadas`, {
+        fecha_sesion: d.fecha,
+        rutina_id: d.rutinaId,
+        ejercicios: d.ejercicios.map((e) => ({
+          ejercicio_id: e.ejercicioId,
+          omitido: e.omitido,
+          series: e.series.map((s) => ({
+            completada: s.completada,
+            repeticiones: s.repeticiones,
+            carga: s.carga,
+            duracion_segundos: s.duracionSegundos,
+          })),
+        })),
+      })
+      .pipe(map(aSesion));
   }
 
   agregarEjercicio(id: string, ejercicioId: string): Observable<Sesion> {

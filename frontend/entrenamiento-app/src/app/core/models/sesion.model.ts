@@ -1,3 +1,5 @@
+import { DatosSerie } from './rutina.model';
+
 export type EstadoSesion = 'EN_CURSO' | 'FINALIZADA' | 'ABANDONADA';
 export type ResultadoEjercicio = 'PENDIENTE' | 'CUMPLIDO' | 'MODIFICADO' | 'OMITIDO' | 'SIN_PLAN';
 
@@ -42,4 +44,14 @@ export interface ResumenSesion {
   estado: EstadoSesion;
   cantidadEjercicios: number;
   seriesCompletadas: number;
+}
+
+export interface SerieHecha extends DatosSerie {
+  completada: boolean;
+}
+
+export interface DatosSesionPasada {
+  fecha: string; 
+  rutinaId?: string;
+  ejercicios: { ejercicioId: string; omitido: boolean; series: SerieHecha[] }[];
 }
