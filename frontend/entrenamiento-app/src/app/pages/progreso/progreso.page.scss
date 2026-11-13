@@ -1,0 +1,17 @@
+@use '../../shared/styles/pantalla';
+
+.intro {
+  margin: -0.5rem 0 1rem;
+  max-width: 32rem;
+  color: var(--tempo-tinta-suave);
+}
+
+.marca {
+  flex-shrink: 0;
+  font-family: var(--tempo-fuente-titulo);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--tempo-acento);
+  font-variant-numeric: tabular-nums;
+}

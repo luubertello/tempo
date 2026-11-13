@@ -1,0 +1,35 @@
+<ion-content [fullscreen]="true">
+  <main class="pantalla">
+    <h1>Progreso</h1>
+
+    @if (error()) {
+      <div class="aviso error" role="alert">
+        <p>{{ error() }}</p>
+        <ion-button fill="clear" (click)="cargar()">Reintentar</ion-button>
+      </div>
+    } @else if (cargando() && resumen().length === 0) {
+      <ion-spinner class="cargando" name="dots" />
+    } @else if (resumen().length === 0) {
+      <div class="aviso">
+        <p>Cuando finalices tu primer entrenamiento, acá vas a ver tu marca máxima de cada ejercicio.</p>
+        <ion-button fill="clear" routerLink="/entrenar">Ir a Entrenar</ion-button>
+      </div>
+    } @else {
+      <p class="intro">Tu mejor marca en cada ejercicio. Tocá uno para ver cómo evolucionó.</p>
+
+      <ul class="filas">
+        @for (r of resumen(); track r.ejercicioId) {
+          <li>
+            <a class="fila" [routerLink]="['/progreso', r.ejercicioId]">
+              <span class="datos">
+                <span class="nombre">{{ r.nombre }}</span>
+                <span class="detalle">{{ veces(r) }}</span>
+              </span>
+              <span class="marca">{{ formatoValor(r.marcaMaxima, r.unidad) }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </main>
+</ion-content>

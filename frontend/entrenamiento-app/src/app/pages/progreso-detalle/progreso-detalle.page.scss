@@ -1,0 +1,53 @@
+@use '../../shared/styles/pantalla';
+
+ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --color: var(--tempo-acento);
+}
+
+.pantalla {
+  padding-top: 0.5rem;
+}
+
+h1 {
+  margin-bottom: 1.5rem;
+}
+
+.etiqueta-marca {
+  margin: 0;
+  color: var(--tempo-tinta-suave);
+}
+
+.marca {
+  margin: 0 0 1.75rem;
+  font-family: var(--tempo-fuente-titulo);
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--tempo-acento);
+  font-variant-numeric: tabular-nums;
+}
+
+ion-segment {
+  --background: transparent;
+}
+
+ion-segment-button {
+  --color: var(--tempo-tinta-suave);
+  --color-checked: var(--tempo-acento);
+  --indicator-color: var(--tempo-acento);
+  text-transform: none;
+  font-weight: 600;
+}
+
+.grafico {
+  margin-top: 1.5rem;
+}
+
+.resumen {
+  margin: 1.25rem 0 0;
+  max-width: 32rem;
+  color: var(--tempo-tinta-suave);
+}

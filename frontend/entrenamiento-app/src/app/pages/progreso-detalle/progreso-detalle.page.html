@@ -1,0 +1,48 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/progreso" text="Progreso" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="pantalla">
+    @if (error()) {
+      <div class="aviso error" role="alert">
+        <p>{{ error() }}</p>
+        <ion-button fill="clear" (click)="cargar()">Reintentar</ion-button>
+      </div>
+    } @else if (evolucion(); as e) {
+      <h1>{{ e.nombre }}</h1>
+
+      @if (marca() !== null) {
+        <p class="etiqueta-marca">{{ etiquetaMarca() }}</p>
+        <p class="marca">{{ formatoValor(marca()!, e.unidad) }}</p>
+      }
+
+      <ion-segment mode="md" [value]="periodo()" (ionChange)="cambiarPeriodo($event)">
+        <ion-segment-button value="todo"><ion-label>Todo</ion-label></ion-segment-button>
+        <ion-segment-button value="90"><ion-label>3 meses</ion-label></ion-segment-button>
+        <ion-segment-button value="30"><ion-label>1 mes</ion-label></ion-segment-button>
+      </ion-segment>
+
+      @if (e.puntos.length === 0) {
+        <div class="aviso">
+          @if (periodo() === 'todo') {
+            <p>Todavía no hiciste este ejercicio en un entrenamiento finalizado.</p>
+          } @else {
+            <p>No hay registros de este ejercicio en el período elegido. Probá con “Todo”.</p>
+          }
+        </div>
+      } @else {
+        <div class="grafico">
+          <app-grafico-evolucion [puntos]="e.puntos" [unidad]="e.unidad" />
+        </div>
+        <p class="resumen">{{ resumen() }}</p>
+      }
+    } @else {
+      <ion-spinner class="cargando" name="dots" />
+    }
+  </main>
+</ion-content>
