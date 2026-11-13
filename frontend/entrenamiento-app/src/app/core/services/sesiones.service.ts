@@ -3,8 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { API_URL } from '../config/entorno';
 import { DatosSerie } from '../models/rutina.model';
-import { EstadoSesion, ObjetivoSerie, ResultadoEjercicio, Sesion } from '../models/sesion.model';
-
+import { EstadoSesion, ObjetivoSerie, ResultadoEjercicio, ResumenSesion, Sesion } from '../models/sesion.model';
 interface ObjetivoApi {
   repeticiones: number | null;
   carga: number | null;
@@ -31,6 +30,16 @@ interface SesionApi {
       objetivo: ObjetivoApi | null;
     }[];
   }[];
+}
+
+interface ResumenApi {
+  id: string;
+  rutina_id: string | null;
+  nombre_rutina: string | null;
+  fecha_sesion: string;
+  estado: EstadoSesion;
+  cantidad_ejercicios: number;
+  series_completadas: number;
 }
 
 const aObjetivo = (o: ObjetivoApi | null): ObjetivoSerie | null =>
@@ -103,5 +112,53 @@ export class SesionesService {
 
   abandonar(id: string): Observable<Sesion> {
     return this.http.post<SesionApi>(`${this.base}/${id}/abandonar`, {}).pipe(map(aSesion));
+  }
+
+  listar(estado?: EstadoSesion): Observable<ResumenSesion[]> {
+    return this.http.get<ResumenApi[]>(this.base, { params: estado ? { estado } : {} }).pipe(
+      map((lista) =>
+        lista.map((r) => ({
+          id: r.id,
+          rutinaId: r.rutina_id,
+          nombreRutina: r.nombre_rutina,
+          fechaSesion: r.fecha_sesion,
+          estado: r.estado,
+          cantidadEjercicios: r.cantidad_ejercicios,
+          seriesCompletadas: r.series_completadas,
+        })),
+      ),
+    );
+  }
+
+  corregirSerie(
+    id: string,
+    ordenEjercicio: number,
+    ordenSerie: number,
+    cambios: { completada?: boolean; datos?: DatosSerie },
+  ): Observable<void> {
+    return this.http
+      .patch(`${this.base}/${id}/ejercicios/${ordenEjercicio}/series/${ordenSerie}`, {
+        completada: cambios.completada,
+        repeticiones: cambios.datos?.repeticiones,
+        carga: cambios.datos?.carga,
+        duracion_segundos: cambios.datos?.duracionSegundos,
+      })
+      .pipe(map(() => undefined));
+  }
+
+  quitarSerie(id: string, ordenEjercicio: number, ordenSerie: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}/ejercicios/${ordenEjercicio}/series/${ordenSerie}`);
+  }
+
+  quitarEjercicio(id: string, ordenEjercicio: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}/ejercicios/${ordenEjercicio}`);
+  }
+
+  cambiarFecha(id: string, fecha: string): Observable<void> {
+    return this.http.patch(`${this.base}/${id}`, { fecha_sesion: fecha }).pipe(map(() => undefined));
+  }
+
+  eliminar(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

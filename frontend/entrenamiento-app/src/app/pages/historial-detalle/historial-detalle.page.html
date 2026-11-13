@@ -1,0 +1,165 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/historial" text="Historial" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="pantalla">
+    @if (error()) {
+      <div class="aviso error" role="alert"><p>{{ error() }}</p></div>
+    } @else if (sesion(); as s) {
+      <h1>{{ titulo() }}</h1>
+      <div class="fecha">
+        <span>{{ formatoFecha(s.fechaSesion) }}</span>
+        @if (editable()) {
+          <ion-button fill="clear" size="small" [disabled]="trabajando()" (click)="cambiandoFecha.set(true)">
+            Cambiar fecha
+          </ion-button>
+        }
+      </div>
+      <p class="intro">{{ resumen() }}</p>
+
+      @if (s.estado === 'ABANDONADA') {
+        <p class="intro">
+          Este entrenamiento se abandonó, no cuenta en tus estadísticas y no se puede corregir. Si no lo querés,
+          eliminalo.
+        </p>
+      } @else if (s.estado === 'EN_CURSO') {
+        <p class="intro">Este entrenamiento está en curso.</p>
+        <ion-button class="principal" expand="block" routerLink="/entrenar">Seguir entrenando</ion-button>
+      }
+
+      <ol class="ejercicios">
+        @for (e of s.ejercicios; track e.orden) {
+          @let modo = modoDe(e.ejercicioId);
+          <li class="ejercicio" [class.omitido]="e.omitido">
+            <div class="cabecera">
+              <span class="orden">{{ e.orden }}</span>
+              <div class="titulo-ejercicio">
+                <h2>{{ nombreDe(e.ejercicioId) }}</h2>
+                @if (etiquetaResultado(e.resultado); as r) {
+                  <span class="resultado" [attr.data-resultado]="e.resultado">{{ r }}</span>
+                }
+              </div>
+              @if (seriesHechas(e) > 0) {
+                <app-compas [total]="seriesHechas(e)" [hechas]="seriesHechas(e)" />
+              }
+            </div>
+
+            <div class="series">
+              @for (x of e.series; track x.orden) {
+                @if (esEdicion(e, x)) {
+                  <div class="serie edicion">
+                    <span class="num">{{ x.orden }}</span>
+                    <div class="entrada-cuerpo">
+                      <div class="campos" [class.dos]="modo === 'conCarga'">
+                        @switch (modo) {
+                          @case ('conCarga') {
+                            <ion-input type="number" inputmode="numeric" label="Reps" labelPlacement="stacked" fill="outline"
+                              [value]="borrador().repeticiones" (ionInput)="cambiar('repeticiones', $event)" />
+                            <ion-input type="number" inputmode="decimal" label="Carga (kg)" labelPlacement="stacked" fill="outline"
+                              [value]="borrador().carga" (ionInput)="cambiar('carga', $event)" />
+                          }
+                          @case ('reps') {
+                            <ion-input type="number" inputmode="numeric" label="Reps" labelPlacement="stacked" fill="outline"
+                              [value]="borrador().repeticiones" (ionInput)="cambiar('repeticiones', $event)" />
+                          }
+                          @case ('tiempo') {
+                            <ion-input type="number" inputmode="numeric" label="Duración (seg)" labelPlacement="stacked" fill="outline"
+                              [value]="borrador().duracion" (ionInput)="cambiar('duracion', $event)" />
+                          }
+                        }
+                      </div>
+
+                      @if (x.objetivo; as o) {
+                        <span class="nota">Objetivo: {{ textoSerie(o) }}</span>
+                      }
+
+                      <ion-button class="registrar" expand="block" [disabled]="trabajando()" (click)="guardarEdicion(e, x)">
+                        Guardar cambios
+                      </ion-button>
+                      <div class="opciones">
+                        <ion-button fill="clear" size="small" (click)="cancelarEdicion()">Cancelar</ion-button>
+                        @if (x.completada) {
+                          <ion-button fill="clear" size="small" [disabled]="trabajando()" (click)="marcarNoHecha(e, x)">
+                            Marcar como no hecha
+                          </ion-button>
+                        }
+                        <ion-button class="peligro" fill="clear" size="small" [disabled]="trabajando()" (click)="quitarSerie(e, x)">
+                          Quitar serie
+                        </ion-button>
+                      </div>
+
+                      @if (errorEdicion()) {
+                        <p class="error-accion" role="alert">{{ errorEdicion() }}</p>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <div class="serie" [class.no-hecha]="!x.completada">
+                    <span class="num">{{ x.orden }}</span>
+                    <span class="valor">
+                      @if (x.completada) {
+                        {{ textoSerie(x) }}
+                        @if (x.objetivo && difiere(x)) {
+                          <span class="nota">objetivo {{ textoSerie(x.objetivo) }}</span>
+                        }
+                      } @else {
+                        No hecha
+                        @if (x.objetivo; as o) {
+                          <span class="nota">objetivo {{ textoSerie(o) }}</span>
+                        }
+                      }
+                    </span>
+                    @if (editable()) {
+                      <ion-button fill="clear" size="small" [disabled]="trabajando()" (click)="editar(e, x)">
+                        {{ x.completada ? 'Corregir' : 'Completar' }}
+                      </ion-button>
+                    }
+                  </div>
+                }
+              }
+            </div>
+
+            @if (editable()) {
+              <ion-button class="quitar" fill="clear" size="small" [disabled]="trabajando()" (click)="confirmarQuitarEjercicio(e)">
+                Quitar ejercicio
+              </ion-button>
+            }
+          </li>
+        }
+      </ol>
+
+      @if (errorAccion()) {
+        <p class="error-accion" role="alert">{{ errorAccion() }}</p>
+      }
+
+      <ion-button class="eliminar" fill="clear" [disabled]="trabajando()" (click)="confirmarEliminar()">
+        Eliminar entrenamiento
+      </ion-button>
+
+      @if (editable()) {
+        <ion-modal [isOpen]="cambiandoFecha()" [initialBreakpoint]="0.8" [breakpoints]="[0, 0.8]" (didDismiss)="cambiandoFecha.set(false)">
+          <ng-template>
+            <ion-datetime
+              presentation="date"
+              locale="es-AR"
+              [value]="s.fechaSesion"
+              [max]="hoy"
+              [showDefaultButtons]="true"
+              doneText="Guardar"
+              cancelText="Cancelar"
+              (ionChange)="elegirFecha($event)"
+              (ionCancel)="cambiandoFecha.set(false)"
+            />
+          </ng-template>
+        </ion-modal>
+      }
+    } @else {
+      <ion-spinner class="cargando" name="dots" />
+    }
+  </main>
+</ion-content>

@@ -11,15 +11,9 @@ import { RutinasService } from '../../core/services/rutinas.service';
 import { SesionesService } from '../../core/services/sesiones.service';
 import { mensajeDeError } from '../../core/utils/errores';
 import { formatoFecha, plural, textoSerie, valorDe } from '../../core/utils/formato';
-import { decimal, entero, Modo, modoDeTipo } from '../../core/utils/validaciones';
+import { armarSerieReal, Modo, modoDeTipo, SerieEscrita } from '../../core/utils/validaciones';
 import { CompasComponent } from '../../shared/components/compas/compas.component';
 import { SelectorEjercicioComponent } from '../../shared/components/selector-ejercicio/selector-ejercicio.component';
-
-interface SerieEscrita {
-  repeticiones: string;
-  carga: string;
-  duracion: string;
-}
 
 interface Fila {
   tipo: 'hecha' | 'pendiente' | 'entrada';
@@ -163,7 +157,7 @@ export class EntrenarPage {
     const s = this.sesion();
     if (!s) return;
     const escrita = this.borradores()[e.orden] ?? { repeticiones: '', carga: '', duracion: '' };
-    const { datos, aviso } = this.armar(this.modoDe(e.ejercicioId), escrita);
+    const { datos, aviso } = armarSerieReal(this.modoDe(e.ejercicioId), escrita);
     if (!datos) {
       this.errorSerie.set({ orden: e.orden, mensaje: aviso ?? 'Revisá los datos de la serie.' });
       return;
@@ -181,25 +175,6 @@ export class EntrenarPage {
         next: (nueva) => this.fijar(nueva, e.orden),
         error: (err) => this.errorSerie.set({ orden: e.orden, mensaje: mensajeDeError(err) }),
       });
-  }
-
-  private armar(modo: Modo, b: SerieEscrita): { datos?: DatosSerie; aviso?: string } {
-    if (modo === 'tiempo') {
-      const d = entero(b.duracion, 1, LIMITES.DURACION_MAX_SEGUNDOS);
-      return d === null
-        ? { aviso: `La duración tiene que ser un número entero de segundos, entre 1 y ${LIMITES.DURACION_MAX_SEGUNDOS}.` }
-        : { datos: { duracionSegundos: d } };
-    }
-    const r = entero(b.repeticiones, 1, LIMITES.REPETICIONES_MAX);
-    if (r === null) {
-      return { aviso: `Las repeticiones tienen que ser un número entero, entre 1 y ${LIMITES.REPETICIONES_MAX}.` };
-    }
-    if (modo === 'reps') return { datos: { repeticiones: r } };
-
-    const c = decimal(b.carga, LIMITES.CARGA_MAX_KG);
-    return c === null
-      ? { aviso: `Cargá el peso: mayor a 0 y hasta ${LIMITES.CARGA_MAX_KG} kg, con hasta 2 decimales.` }
-      : { datos: { repeticiones: r, carga: c } };
   }
 
   // ---- acciones sobre el ejercicio y la sesión ----

@@ -33,3 +33,13 @@ export interface Sesion {
   estado: EstadoSesion;
   ejercicios: EjercicioDeSesion[];
 }
+
+export interface ResumenSesion {
+  id: string;
+  rutinaId: string | null;
+  nombreRutina: string | null;
+  fechaSesion: string;
+  estado: EstadoSesion;
+  cantidadEjercicios: number;
+  seriesCompletadas: number;
+}

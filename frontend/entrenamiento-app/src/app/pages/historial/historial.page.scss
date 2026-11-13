@@ -1,0 +1,23 @@
+@use '../../shared/styles/pantalla';
+
+ion-segment {
+  --background: transparent;
+  margin-bottom: 0.5rem;
+}
+
+ion-segment-button {
+  --color: var(--tempo-tinta-suave);
+  --color-checked: var(--tempo-acento);
+  --indicator-color: var(--tempo-acento);
+  text-transform: none;
+  font-weight: 600;
+}
+
+.estado {
+  margin-left: 0.5rem;
+  font-weight: 600;
+
+  &.en-curso {
+    color: var(--tempo-acento);
+  }
+}
