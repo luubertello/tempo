@@ -1,0 +1,42 @@
+<section class="cal" aria-label="Calendario de entrenamientos">
+  <header class="cabecera">
+    <ion-button fill="clear" size="small" aria-label="Mes anterior" (click)="mover(-1)">
+      <ion-icon slot="icon-only" name="chevron-back-outline" />
+    </ion-button>
+    <h2>{{ titulo() }}</h2>
+    <ion-button fill="clear" size="small" aria-label="Mes siguiente" [disabled]="esMesActual()" (click)="mover(1)">
+      <ion-icon slot="icon-only" name="chevron-forward-outline" />
+    </ion-button>
+  </header>
+
+  <p class="resumen">{{ resumen() }}</p>
+
+  <div class="semana" aria-hidden="true">
+    @for (l of letras; track $index) {
+      <span>{{ l }}</span>
+    }
+  </div>
+
+  <div class="grilla">
+    @for (c of celdas(); track $index) {
+      @if (c) {
+        <button
+          type="button"
+          class="dia"
+          [class.entrenado]="c.entrenado"
+          [class.hoy]="c.hoy"
+          [class.elegido]="c.iso === seleccionado()"
+          [disabled]="c.futuro"
+          [attr.aria-label]="c.etiqueta"
+          [attr.aria-pressed]="c.iso === seleccionado()"
+          (click)="elegir.emit(c.iso)"
+        >
+          <span class="num">{{ c.dia }}</span>
+          <span class="marca"></span>
+        </button>
+      } @else {
+        <span></span>
+      }
+    }
+  </div>
+</section>

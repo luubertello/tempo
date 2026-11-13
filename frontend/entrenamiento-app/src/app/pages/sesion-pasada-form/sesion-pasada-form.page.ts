@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import {
+import { ActivatedRoute, Router } from '@angular/router';import {
   AlertController,
   IonBackButton,
   IonButton,
@@ -67,9 +66,10 @@ export class SesionPasadaFormPage implements OnInit {
   private readonly router = inject(Router);
   private readonly modales = inject(ModalController);
   private readonly alertas = inject(AlertController);
+  private readonly route = inject(ActivatedRoute);
 
-  readonly fecha = signal(isoHaceDias(1)); 
   readonly hoy = isoHaceDias(0);
+  readonly fecha = signal(this.fechaInicial());
   readonly rutinaId = signal('');
   readonly ejercicios = signal<EjercicioBorrador[]>([]);
 
@@ -97,6 +97,11 @@ export class SesionPasadaFormPage implements OnInit {
       },
       error: (e) => this.errorCarga.set(mensajeDeError(e)),
     });
+  }
+  
+  private fechaInicial(): string {
+    const f = this.route.snapshot.queryParamMap.get('fecha');
+    return f && /^\d{4}-\d{2}-\d{2}$/.test(f) && f <= this.hoy ? f : isoHaceDias(1);
   }
 
   // ---- catálogo ----

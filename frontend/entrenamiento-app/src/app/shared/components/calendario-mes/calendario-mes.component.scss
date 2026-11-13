@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  ion-button {
+    --color: var(--tempo-acento);
+    margin: 0 -0.5rem;
+  }
+}
+
+.resumen {
+  margin: 0.25rem 0 1rem;
+  color: var(--tempo-tinta-suave);
+}
+
+.semana,
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.semana {
+  margin-bottom: 0.25rem;
+  color: var(--tempo-tinta-suave);
+  font-size: 0.8rem;
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 2.75rem;
+  padding: 0.25rem 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--tempo-tinta);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  &.hoy {
+    border-color: var(--tempo-linea);
+  }
+
+  &.elegido {
+    background: color-mix(in srgb, var(--tempo-acento) 12%, transparent);
+    border-color: var(--tempo-acento);
+  }
+}
+
+.marca {
+  width: 0.9rem;
+  height: 3px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.dia.entrenado {
+  .num {
+    font-weight: 700;
+  }
+  .marca {
+    background: var(--tempo-acento);
+  }
+}
