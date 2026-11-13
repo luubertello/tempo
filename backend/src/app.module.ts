@@ -5,8 +5,6 @@ import { join } from 'path';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { IdentidadModule } from './identidad/identidad.module';
 import { ENTIDADES } from './entidades';
-import { CrearCatalogoEjercicios1793145600000 } from './shared/migrations/1793145600000-CrearCatalogoEjercicios';
-import { CrearUsuarios1793232000000 } from './shared/migrations/1793232000000-CrearUsuarios';
 import { EntrenamientoModule } from './entrenamiento/entrenamiento.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
 
@@ -23,6 +21,9 @@ import { EstadisticasModule } from './estadisticas/estadisticas.module';
         username: config.getOrThrow<string>('DB_USER'),
         password: config.getOrThrow<string>('DB_PASSWORD'),
         database: config.getOrThrow<string>('DB_NAME'),
+        ssl: config.get<string>('DB_SSL') === 'true'
+          ? { rejectUnauthorized: false }
+          : false,
         entities: ENTIDADES,
         migrations: [join(__dirname, 'shared', 'migrations', '*.{ts,js}')],
         migrationsRun: true,
