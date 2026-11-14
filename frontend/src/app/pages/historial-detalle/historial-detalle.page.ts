@@ -23,6 +23,9 @@ import { formatoFecha, plural, textoSerie, valorDe } from '../../core/utils/form
 import { difiereDelObjetivo, etiquetaResultado, seriesHechas } from '../../core/utils/sesion';
 import { armarSerieReal, Modo, modoDeTipo, SerieEscrita } from '../../core/utils/validaciones';
 import { CompasComponent } from '../../shared/components/compas/compas.component';
+import { LIMITES } from '../../core/config/limites';
+import { estadosDeEjercicio } from '../../core/utils/veredicto';
+import { CampoNumericoComponent } from '../../shared/components/campo-numerico/campo-numerico.component';
 
 interface Edicion {
   ejercicio: number;
@@ -36,8 +39,8 @@ const texto = (n: number | null | undefined): string => (n === null || n === und
   templateUrl: './historial-detalle.page.html',
   styleUrl: './historial-detalle.page.scss',
   imports: [
-    IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonButton, IonInput,
-    IonSpinner, IonModal, IonDatetime, RouterLink, CompasComponent,
+    IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonButton,
+    IonSpinner, IonModal, IonDatetime, RouterLink, CompasComponent, CampoNumericoComponent
   ],
 })
 export class HistorialDetallePage {
@@ -53,6 +56,9 @@ export class HistorialDetallePage {
   readonly errorAccion = signal<string | null>(null);
   readonly errorEdicion = signal<string | null>(null);
   readonly trabajando = signal(false);
+
+  readonly limites = LIMITES;
+  readonly estadosDe = (e: EjercicioDeSesion) => estadosDeEjercicio(e, this.sesion()?.estado === 'EN_CURSO');
 
   readonly edicion = signal<Edicion | null>(null);
   readonly borrador = signal<SerieEscrita>({ repeticiones: '', carga: '', duracion: '' });
@@ -124,8 +130,7 @@ export class HistorialDetallePage {
     this.errorEdicion.set(null);
   }
 
-  cambiar(campo: keyof SerieEscrita, ev: Event): void {
-    const valor = valorDe(ev);
+    fijar(campo: keyof SerieEscrita, valor: string): void {
     this.borrador.update((b) => ({ ...b, [campo]: valor }));
   }
 

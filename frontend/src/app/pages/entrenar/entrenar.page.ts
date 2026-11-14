@@ -14,6 +14,7 @@ import { formatoFecha, plural, textoSerie, valorDe } from '../../core/utils/form
 import { armarSerieReal, Modo, modoDeTipo, SerieEscrita } from '../../core/utils/validaciones';
 import { CompasComponent } from '../../shared/components/compas/compas.component';
 import { SelectorEjercicioComponent } from '../../shared/components/selector-ejercicio/selector-ejercicio.component';
+import { estadosDeEjercicio } from '../../core/utils/veredicto';
 
 interface Fila {
   tipo: 'hecha' | 'pendiente' | 'entrada';
@@ -57,6 +58,7 @@ export class EntrenarPage {
   });
 
   readonly textoSerie = textoSerie;
+  readonly estadosDe = (e: EjercicioDeSesion) => estadosDeEjercicio(e, true);
   readonly valorDe = valorDe;
 
   ionViewWillEnter(): void {

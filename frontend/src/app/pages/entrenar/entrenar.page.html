@@ -30,7 +30,7 @@
                 <span class="detalle">{{ detalleDe(e) }}</span>
               </div>
               @if (e.series.length > 0) {
-                <app-compas [total]="e.series.length" [hechas]="hechas(e)" />
+            <app-compas [estados]="estadosDe(e)" />
               }
             </div>
 

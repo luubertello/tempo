@@ -1,0 +1,27 @@
+<div class="campo">
+  <label class="etiqueta" [attr.for]="id">{{ etiqueta() }}</label>
+  <div class="control">
+    <button type="button" class="paso" [attr.aria-label]="'Restar ' + textoPaso()" [disabled]="deshabilitado()" (click)="cambiar(-1)">
+      −
+    </button>
+    <span class="entrada">
+      <input
+        [id]="id"
+        type="text"
+        autocomplete="off"
+        [attr.inputmode]="decimales() ? 'decimal' : 'numeric'"
+        [attr.aria-label]="nombreAccesible()"
+        [value]="valor()"
+        [disabled]="deshabilitado()"
+        (input)="escribir($event)"
+        (focus)="seleccionar($event)"
+      />
+      @if (unidad()) {
+        <span class="unidad" aria-hidden="true">{{ unidad() }}</span>
+      }
+    </span>
+    <button type="button" class="paso" [attr.aria-label]="'Sumar ' + textoPaso()" [disabled]="deshabilitado()" (click)="cambiar(1)">
+      +
+    </button>
+  </div>
+</div>

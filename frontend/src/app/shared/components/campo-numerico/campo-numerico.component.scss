@@ -1,0 +1,82 @@
+:host {
+  display: block;
+}
+
+.etiqueta {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--tempo-tinta-suave);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.control {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--tempo-linea);
+  border-radius: var(--tempo-radio-control);
+  background: var(--tempo-superficie);
+
+  &:focus-within {
+    border-color: var(--tempo-acento);
+    box-shadow: 0 0 0 1px var(--tempo-acento);
+  }
+}
+
+.paso {
+  min-height: 3.25rem;
+  border: 0;
+  background: none;
+  color: var(--tempo-acento);
+  font: inherit;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:active:not(:disabled) {
+    background: color-mix(in srgb, var(--tempo-acento) 12%, transparent);
+  }
+
+  &:focus-visible {
+    outline-offset: -3px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.entrada {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-inline: 1px solid var(--tempo-linea);
+}
+
+input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 0 0.35rem;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--tempo-tinta);
+  font-family: var(--tempo-fuente-titulo);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.unidad {
+  position: absolute;
+  right: 0;
+  bottom: 0.3rem;
+  left: 0;
+  color: var(--tempo-tinta-suave);
+  font-size: 0.75rem;
+  text-align: center;
+}

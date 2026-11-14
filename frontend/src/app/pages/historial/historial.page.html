@@ -58,6 +58,9 @@
                 <span class="datos">
                   <span class="nombre">{{ titulo(s) }}</span>
                   <span class="detalle">{{ formatoFecha(s.fechaSesion) }}</span>
+                   @if (s.estado === 'FINALIZADA' && s.balance.planificadas > 0) {
+                    <span class="logro">Lograste {{ s.balance.logradas }} de {{ s.balance.planificadas }} series del plan</span>
+                  }
                   <span class="detalle">
                     {{ resumen(s) }}
                     @if (s.estado === 'ABANDONADA') {
