@@ -18,14 +18,21 @@ ion-input {
   --highlight-color-focused: var(--tempo-acento);
   --padding-start: 12px;
   --padding-end: 12px;
-  min-height: 48px;
-  font-variant-numeric: tabular-nums;
+  min-height: 52px;
+}
+
+.error-campo {
+  margin: 0.35rem 0 0;
+  color: var(--tempo-error);
+  font-size: 0.85rem;
 }
 
 .vacio {
   margin: 1.5rem 0 0;
   color: var(--tempo-tinta-suave);
 }
+
+// ---- ejercicios ----
 
 .ejercicios {
   list-style: none;
@@ -65,53 +72,66 @@ ion-input {
 
 .herramientas {
   display: flex;
-
-  ion-button {
-    --color: var(--tempo-tinta-suave);
-    margin: 0;
-  }
 }
 
-.series {
-  --columnas: 2rem 1fr 2.5rem;
-
-  &.dos-campos {
-    --columnas: 2rem 1fr 1fr 2.5rem;
-  }
+ion-button.herramienta {
+  --color: var(--tempo-tinta-suave);
+  --padding-start: 0;
+  --padding-end: 0;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
 }
 
-.encabezado,
-.serie {
+
+.campos-esquema {
   display: grid;
-  grid-template-columns: var(--columnas);
-  align-items: center;
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
 }
 
-.encabezado {
-  margin-bottom: 0.4rem;
-  color: var(--tempo-tinta-suave);
-  font-size: 0.8rem;
+.resumen-esquema {
+  margin: 0.9rem 0 0;
+  font-family: var(--tempo-fuente-titulo);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.serie {
-  margin-bottom: 0.5rem;
+.serie-fila {
+  padding: 0.5rem 0 0.9rem;
 
-  ion-button {
-    --color: var(--tempo-tinta-suave);
-    margin: 0;
+  & + .serie-fila {
+    border-top: 1px solid var(--tempo-linea);
+    padding-top: 0.75rem;
   }
 }
 
-.num {
+.serie-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.serie-num {
   color: var(--tempo-tinta-suave);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+}
+
+.pie-ejercicio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0 -0.5rem;
 }
 
 ion-button.secundario {
   --color: var(--tempo-acento);
-  margin-left: -0.5rem;
+  margin: 0;
+
+  &.suave {
+    --color: var(--tempo-tinta-suave);
+  }
 }
 
 ion-button.agregar {
@@ -119,12 +139,16 @@ ion-button.agregar {
   --border-color: var(--tempo-acento);
   --border-radius: var(--tempo-radio-control);
   height: 3rem;
-  margin: 1.25rem 0;
+  margin: 1.25rem 0 0.5rem;
   font-weight: 600;
 }
 
 .error-accion {
-  margin: 0 0 1rem;
+  margin: 1rem 0;
   color: var(--tempo-error);
   font-size: 0.9rem;
+}
+
+ion-button.principal {
+  margin-top: 1.25rem;
 }

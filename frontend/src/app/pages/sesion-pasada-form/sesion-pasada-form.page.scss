@@ -50,6 +50,12 @@ ion-select {
   font-size: 0.9rem;
 }
 
+.error-campo {
+  margin: 0.35rem 0 0;
+  color: var(--tempo-error);
+  font-size: 0.85rem;
+}
+
 .vacio {
   margin: 1.5rem 0 0;
   color: var(--tempo-tinta-suave);
@@ -76,7 +82,7 @@ ion-select {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .orden {
@@ -99,89 +105,96 @@ ion-select {
 
 .herramientas {
   display: flex;
+}
 
-  ion-button {
-    --color: var(--tempo-tinta-suave);
-    margin: 0;
-  }
+ion-button.herramienta {
+  --color: var(--tempo-tinta-suave);
+  --padding-start: 0;
+  --padding-end: 0;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
 }
 
 // ---- series ----
 
-.encabezado,
-.serie {
-  display: grid;
-  grid-template-columns: 2rem 1fr auto;
-  align-items: center;
-  gap: 0.5rem;
-}
+.serie-fila {
+  padding: 0.5rem 0 0.9rem;
 
-.encabezado {
-  margin-bottom: 0.4rem;
-  color: var(--tempo-tinta-suave);
-  font-size: 0.8rem;
-}
-
-.titulo-acciones {
-  width: 5rem;
-  text-align: left;
-}
-
-.serie {
-  margin-bottom: 0.5rem;
-}
-
-.campos {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.5rem;
-
-  &.dos {
-    grid-template-columns: 1fr 1fr;
+  & + .serie-fila {
+    border-top: 1px solid var(--tempo-linea);
+    padding-top: 0.75rem;
   }
 }
 
-.num {
-  color: var(--tempo-tinta-suave);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+.serie-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
 }
 
-.no-hecha {
-  grid-column: 1 / -1;
+.serie-num {
   color: var(--tempo-tinta-suave);
+  font-weight: 600;
 }
 
 .acciones-serie {
   display: flex;
-  width: 5rem;
+  align-items: center;
+  gap: 0.25rem;
+}
 
-  ion-button {
-    --color: var(--tempo-tinta-suave);
-    margin: 0;
+.hecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--tempo-linea);
+  border-radius: var(--tempo-radio-control);
+  background: var(--tempo-superficie);
+  color: var(--tempo-tinta-suave);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 1.3rem;
   }
 
-  ion-button.tilde.activo {
-    --color: var(--tempo-acento);
+  &[aria-checked='true'] {
+    border-color: var(--tempo-acento);
+    color: var(--tempo-acento);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
   }
 }
 
-ion-input {
-  --background: var(--tempo-superficie);
-  --border-color: var(--tempo-linea);
-  --border-radius: var(--tempo-radio-control);
-  --highlight-color-focused: var(--tempo-acento);
-  --padding-start: 12px;
-  --padding-end: 12px;
-  min-height: 48px;
-  font-variant-numeric: tabular-nums;
+.plan-serie {
+  margin: 0 0 0.6rem;
+  color: var(--tempo-tinta-suave);
+
+  strong {
+    color: var(--tempo-tinta);
+    font-family: var(--tempo-fuente-titulo);
+  }
+}
+
+.campos-esquema {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
 }
 
 .pie-ejercicio {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
-  margin-left: -0.5rem;
+  margin: 0.5rem 0 0 -0.5rem;
 }
 
 ion-button.secundario {
@@ -198,14 +211,18 @@ ion-button.agregar {
   --border-color: var(--tempo-acento);
   --border-radius: var(--tempo-radio-control);
   height: 3rem;
-  margin: 1.25rem 0;
+  margin: 1.25rem 0 0.5rem;
   font-weight: 600;
 }
 
 .error-accion {
-  margin: 0 0 1rem;
+  margin: 1rem 0 0;
   color: var(--tempo-error);
   font-size: 0.9rem;
+}
+
+ion-button.principal {
+  margin-top: 1.25rem;
 }
 
 ion-datetime {

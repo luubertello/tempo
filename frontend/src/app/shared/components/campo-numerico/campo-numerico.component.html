@@ -1,4 +1,4 @@
-<div class="campo">
+<div class="campo" [class.invalido]="error()">
   <label class="etiqueta" [attr.for]="id">{{ etiqueta() }}</label>
   <div class="control">
     <button type="button" class="paso" [attr.aria-label]="'Restar ' + textoPaso()" [disabled]="deshabilitado()" (click)="cambiar(-1)">
@@ -11,6 +11,8 @@
         autocomplete="off"
         [attr.inputmode]="decimales() ? 'decimal' : 'numeric'"
         [attr.aria-label]="nombreAccesible()"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="error() ? id + '-error' : null"
         [value]="valor()"
         [disabled]="deshabilitado()"
         (input)="escribir($event)"
@@ -24,4 +26,7 @@
       +
     </button>
   </div>
+  @if (error(); as mensaje) {
+    <p class="error" [id]="id + '-error'" role="alert">{{ mensaje }}</p>
+  }
 </div>

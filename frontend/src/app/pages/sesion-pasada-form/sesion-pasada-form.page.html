@@ -36,8 +36,8 @@
       </ion-select>
       @if (rutinaId()) {
         <p class="ayuda">
-          Se cargó el plan de la rutina. Cambiá lo que hiciste distinto. Si mantenés el orden de los ejercicios, después
-          vas a ver cuánto te desviaste del plan.
+          Cargamos el plan de la rutina como punto de partida. Cambiá lo que hiciste distinto. Si mantenés el orden de
+          los ejercicios, después vas a ver cuánto te desviaste del plan.
         </p>
       }
 
@@ -56,80 +56,71 @@
                 <span class="detalle">{{ e.omitido ? 'Omitido' : etiquetaDe(e.ejercicioId) }}</span>
               </div>
               <div class="herramientas">
-                <ion-button fill="clear" size="small" aria-label="Subir ejercicio" [disabled]="primero" (click)="mover(i, -1)">
+                <ion-button class="herramienta" fill="clear" aria-label="Subir ejercicio" [disabled]="primero" (click)="mover(i, -1)">
                   <ion-icon slot="icon-only" name="chevron-up-outline" />
                 </ion-button>
-                <ion-button fill="clear" size="small" aria-label="Bajar ejercicio" [disabled]="ultimo" (click)="mover(i, 1)">
+                <ion-button class="herramienta" fill="clear" aria-label="Bajar ejercicio" [disabled]="ultimo" (click)="mover(i, 1)">
                   <ion-icon slot="icon-only" name="chevron-down-outline" />
                 </ion-button>
-                <ion-button fill="clear" size="small" aria-label="Quitar ejercicio" (click)="quitarEjercicio(i)">
+                <ion-button class="herramienta" fill="clear" aria-label="Quitar ejercicio" (click)="quitarEjercicio(i)">
                   <ion-icon slot="icon-only" name="trash-outline" />
                 </ion-button>
               </div>
             </div>
 
-            <div class="series">
-              <div class="encabezado">
-                <span>Serie</span>
-                <div class="campos" [class.dos]="modo === 'conCarga'">
-                  @switch (modo) {
-                    @case ('conCarga') {
-                      <span>Reps</span>
-                      <span>Carga (kg)</span>
-                    }
-                    @case ('reps') {
-                      <span>Reps</span>
-                    }
-                    @case ('tiempo') {
-                      <span>Duración (seg)</span>
-                    }
-                  }
-                </div>
-                <span class="titulo-acciones">Hecha</span>
-              </div>
-
-              @for (s of e.series; track $index; let j = $index) {
-                <div class="serie">
-                  <span class="num">{{ j + 1 }}</span>
-
-                  <div class="campos" [class.dos]="modo === 'conCarga'">
-                    @if (e.omitido || !s.hecha) {
-                      <span class="no-hecha">{{ e.omitido ? 'Omitida' : 'No hecha' }}</span>
-                    } @else {
-                      @switch (modo) {
-                        @case ('conCarga') {
-                          <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Repeticiones"
-                            [value]="s.repeticiones" (ionInput)="cambiar(i, j, 'repeticiones', $event)" />
-                          <ion-input type="number" inputmode="decimal" fill="outline" aria-label="Carga en kilos"
-                            [value]="s.carga" (ionInput)="cambiar(i, j, 'carga', $event)" />
-                        }
-                        @case ('reps') {
-                          <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Repeticiones"
-                            [value]="s.repeticiones" (ionInput)="cambiar(i, j, 'repeticiones', $event)" />
-                        }
-                        @case ('tiempo') {
-                          <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Duración en segundos"
-                            [value]="s.duracion" (ionInput)="cambiar(i, j, 'duracion', $event)" />
-                        }
-                      }
-                    }
-                  </div>
-
+            @for (s of e.series; track $index; let j = $index) {
+              @let k = 'e' + i + '.s' + j;
+              @let activa = s.hecha && !e.omitido;
+              <div class="serie-fila">
+                <div class="serie-cab">
+                  <span class="serie-num">Serie {{ j + 1 }}</span>
                   <div class="acciones-serie">
-                    <ion-button class="tilde" fill="clear" size="small" [class.activo]="s.hecha && !e.omitido"
-                      [disabled]="e.omitido" [attr.aria-pressed]="s.hecha && !e.omitido"
-                      [attr.aria-label]="s.hecha ? 'Marcar como no hecha' : 'Marcar como hecha'"
+                    <button type="button" class="hecha" role="switch" [attr.aria-checked]="activa" [disabled]="e.omitido"
                       (click)="alternarHecha(i, j)">
-                      <ion-icon slot="icon-only" [name]="s.hecha && !e.omitido ? 'checkmark-circle' : 'ellipse-outline'" />
-                    </ion-button>
-                    <ion-button fill="clear" size="small" aria-label="Quitar serie" [disabled]="e.series.length === 1"
-                      (click)="quitarSerie(i, j)">
+                      <ion-icon [name]="activa ? 'checkmark-circle' : 'ellipse-outline'" aria-hidden="true" />
+                      {{ activa ? 'Hecha' : e.omitido ? 'Omitida' : 'No hecha' }}
+                    </button>
+                    <ion-button class="herramienta" fill="clear" [attr.aria-label]="'Quitar la serie ' + (j + 1)"
+                      [disabled]="e.series.length === 1" (click)="quitarSerie(i, j)">
                       <ion-icon slot="icon-only" name="close-outline" />
                     </ion-button>
                   </div>
                 </div>
-              }
-            </div>
+
+                @if (planDe(i, j); as p) {
+                  <p class="plan-serie">Plan: <strong>{{ textoSerie(p) }}</strong></p>
+                }
+
+                @if (activa) {
+                  <div class="campos-esquema">
+                    @switch (modo) {
+                      @case ('conCarga') {
+                        <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                          [maximo]="limites.REPETICIONES_MAX" [valor]="s.repeticiones"
+                          [error]="error_(k + '.repeticiones')" (valorChange)="cambiar(i, j, 'repeticiones', $event)" />
+                        <app-campo-numerico etiqueta="Carga" unidad="kg" [paso]="2.5" [minimo]="0.5"
+                          [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="s.carga"
+                          [error]="error_(k + '.carga')" (valorChange)="cambiar(i, j, 'carga', $event)" />
+                      }
+                      @case ('reps') {
+                        <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                          [maximo]="limites.REPETICIONES_MAX" [valor]="s.repeticiones"
+                          [error]="error_(k + '.repeticiones')" (valorChange)="cambiar(i, j, 'repeticiones', $event)" />
+                      }
+                      @case ('tiempo') {
+                        <app-campo-numerico etiqueta="Duración" unidad="seg" [paso]="5" [minimo]="1"
+                          [maximo]="limites.DURACION_MAX_SEGUNDOS" [valor]="s.duracion"
+                          [error]="error_(k + '.duracion')" (valorChange)="cambiar(i, j, 'duracion', $event)" />
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            @if (error_('e' + i + '.series'); as mensaje) {
+              <p class="error-campo" role="alert">{{ mensaje }}</p>
+            }
 
             <div class="pie-ejercicio">
               <ion-button class="secundario" fill="clear" size="small" [disabled]="e.omitido" (click)="agregarSerie(i)">
@@ -144,7 +135,13 @@
       </ol>
 
       <ion-button class="agregar" fill="outline" expand="block" (click)="elegirEjercicio()">Agregar ejercicio</ion-button>
+      @if (error_('ejercicios'); as mensaje) {
+        <p class="error-campo" role="alert">{{ mensaje }}</p>
+      }
 
+      @if (error_('hechas'); as mensaje) {
+        <p class="error-campo" role="alert">{{ mensaje }}</p>
+      }
       @if (error()) {
         <p class="error-accion" role="alert">{{ error() }}</p>
       }

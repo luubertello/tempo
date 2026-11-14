@@ -80,3 +80,20 @@ input {
   font-size: 0.75rem;
   text-align: center;
 }
+
+.invalido {
+  .etiqueta {
+    color: var(--tempo-error);
+  }
+
+  .control {
+    border-color: var(--tempo-error);
+    box-shadow: 0 0 0 1px var(--tempo-error);
+  }
+}
+
+.error {
+  margin: 0.35rem 0 0;
+  color: var(--tempo-error);
+  font-size: 0.85rem;
+}

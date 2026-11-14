@@ -16,6 +16,7 @@ export class CampoNumericoComponent {
   decimales = input(false);
   deshabilitado = input(false);
   valor = model('');
+  error = input<string | null>(null);
 
   readonly id = `campo-numerico-${siguienteId++}`;
 

@@ -20,8 +20,11 @@
         placeholder="Por ejemplo, Piernas"
         maxlength="100"
         [value]="nombre()"
-        (ionInput)="nombre.set(valorDe($event))"
+        (ionInput)="cambiarNombre($event)"
       />
+      @if (error_('nombre'); as mensaje) {
+        <p class="error-campo" role="alert">{{ mensaje }}</p>
+      }
 
       @if (ejercicios().length === 0) {
         <p class="vacio">Todavía no agregaste ejercicios.</p>
@@ -30,6 +33,7 @@
       <ol class="ejercicios">
         @for (e of ejercicios(); track $index; let i = $index; let primero = $first; let ultimo = $last) {
           @let modo = modoDe(e.ejercicioId);
+          @let c = 'e' + i;
           <li class="ejercicio">
             <div class="cabecera">
               <span class="orden">{{ i + 1 }}</span>
@@ -38,68 +42,112 @@
                 <span class="detalle">{{ etiquetaDe(e.ejercicioId) }}</span>
               </div>
               <div class="herramientas">
-                <ion-button fill="clear" size="small" aria-label="Subir ejercicio" [disabled]="primero" (click)="mover(i, -1)">
+                <ion-button class="herramienta" fill="clear" aria-label="Subir ejercicio" [disabled]="primero" (click)="mover(i, -1)">
                   <ion-icon slot="icon-only" name="chevron-up-outline" />
                 </ion-button>
-                <ion-button fill="clear" size="small" aria-label="Bajar ejercicio" [disabled]="ultimo" (click)="mover(i, 1)">
+                <ion-button class="herramienta" fill="clear" aria-label="Bajar ejercicio" [disabled]="ultimo" (click)="mover(i, 1)">
                   <ion-icon slot="icon-only" name="chevron-down-outline" />
                 </ion-button>
-                <ion-button fill="clear" size="small" aria-label="Quitar ejercicio" (click)="quitarEjercicio(i)">
+                <ion-button class="herramienta" fill="clear" aria-label="Quitar ejercicio" (click)="quitarEjercicio(i)">
                   <ion-icon slot="icon-only" name="trash-outline" />
                 </ion-button>
               </div>
             </div>
 
-            <div class="series" [class.dos-campos]="modo === 'conCarga'">
-              <div class="encabezado">
-                <span>Serie</span>
+            @if (!e.personalizado) {
+              <!-- Series iguales: una sola línea -->
+              <div class="campos-esquema">
+                <app-campo-numerico etiqueta="Series" [paso]="1" [minimo]="1" [maximo]="limites.SERIES_POR_EJERCICIO"
+                  [valor]="e.cantidad" [error]="error_(c + '.cantidad')" (valorChange)="cambiarCantidad(i, $event)" />
                 @switch (modo) {
                   @case ('conCarga') {
-                    <span>Reps</span>
-                    <span>Carga (kg)</span>
+                    <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                      [maximo]="limites.REPETICIONES_MAX" [valor]="e.base.repeticiones"
+                      [error]="error_(c + '.repeticiones')" (valorChange)="cambiarBase(i, 'repeticiones', $event)" />
+                    <app-campo-numerico etiqueta="Carga (opcional)" unidad="kg" [paso]="2.5" [minimo]="0.5"
+                      [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="e.base.carga"
+                      [error]="error_(c + '.carga')" (valorChange)="cambiarBase(i, 'carga', $event)" />
                   }
                   @case ('reps') {
-                    <span>Reps</span>
+                    <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                      [maximo]="limites.REPETICIONES_MAX" [valor]="e.base.repeticiones"
+                      [error]="error_(c + '.repeticiones')" (valorChange)="cambiarBase(i, 'repeticiones', $event)" />
                   }
                   @case ('tiempo') {
-                    <span>Duración (seg)</span>
+                    <app-campo-numerico etiqueta="Duración" unidad="seg" [paso]="5" [minimo]="1"
+                      [maximo]="limites.DURACION_MAX_SEGUNDOS" [valor]="e.base.duracion"
+                      [error]="error_(c + '.duracion')" (valorChange)="cambiarBase(i, 'duracion', $event)" />
                   }
                 }
-                <span></span>
               </div>
 
-              @for (s of e.series; track $index; let j = $index) {
-                <div class="serie">
-                  <span class="num">{{ j + 1 }}</span>
-                  @switch (modo) {
-                    @case ('conCarga') {
-                      <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Repeticiones"
-                        [value]="s.repeticiones" (ionInput)="cambiar(i, j, 'repeticiones', $event)" />
-                      <ion-input type="number" inputmode="decimal" fill="outline" aria-label="Carga en kilos" placeholder="Opcional"
-                        [value]="s.carga" (ionInput)="cambiar(i, j, 'carga', $event)" />
-                    }
-                    @case ('reps') {
-                      <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Repeticiones"
-                        [value]="s.repeticiones" (ionInput)="cambiar(i, j, 'repeticiones', $event)" />
-                    }
-                    @case ('tiempo') {
-                      <ion-input type="number" inputmode="numeric" fill="outline" aria-label="Duración en segundos"
-                        [value]="s.duracion" (ionInput)="cambiar(i, j, 'duracion', $event)" />
-                    }
-                  }
-                  <ion-button fill="clear" size="small" aria-label="Quitar serie" [disabled]="e.series.length === 1" (click)="quitarSerie(i, j)">
-                    <ion-icon slot="icon-only" name="close-outline" />
-                  </ion-button>
-                </div>
+              @if (resumen(e); as frase) {
+                <p class="resumen-esquema">{{ frase }}</p>
               }
-            </div>
 
-            <ion-button class="secundario" fill="clear" size="small" (click)="agregarSerie(i)">Agregar serie</ion-button>
+              <div class="pie-ejercicio">
+                <ion-button class="secundario" fill="clear" size="small" (click)="personalizar(i)">
+                  Personalizar series
+                </ion-button>
+              </div>
+            } @else {
+              <!-- Series distintas: una por una -->
+              <div class="series-lista">
+                @for (s of e.series; track $index; let j = $index) {
+                  @let k = c + '.s' + j;
+                  <div class="serie-fila">
+                    <div class="serie-cab">
+                      <span class="serie-num">Serie {{ j + 1 }}</span>
+                      <ion-button class="herramienta" fill="clear" [attr.aria-label]="'Quitar la serie ' + (j + 1)"
+                        [disabled]="e.series.length === 1" (click)="quitarSerie(i, j)">
+                        <ion-icon slot="icon-only" name="close-outline" />
+                      </ion-button>
+                    </div>
+                    <div class="campos-esquema">
+                      @switch (modo) {
+                        @case ('conCarga') {
+                          <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                            [maximo]="limites.REPETICIONES_MAX" [valor]="s.repeticiones"
+                            [error]="error_(k + '.repeticiones')" (valorChange)="cambiarSerie(i, j, 'repeticiones', $event)" />
+                          <app-campo-numerico etiqueta="Carga (opcional)" unidad="kg" [paso]="2.5" [minimo]="0.5"
+                            [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="s.carga"
+                            [error]="error_(k + '.carga')" (valorChange)="cambiarSerie(i, j, 'carga', $event)" />
+                        }
+                        @case ('reps') {
+                          <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                            [maximo]="limites.REPETICIONES_MAX" [valor]="s.repeticiones"
+                            [error]="error_(k + '.repeticiones')" (valorChange)="cambiarSerie(i, j, 'repeticiones', $event)" />
+                        }
+                        @case ('tiempo') {
+                          <app-campo-numerico etiqueta="Duración" unidad="seg" [paso]="5" [minimo]="1"
+                            [maximo]="limites.DURACION_MAX_SEGUNDOS" [valor]="s.duracion"
+                            [error]="error_(k + '.duracion')" (valorChange)="cambiarSerie(i, j, 'duracion', $event)" />
+                        }
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (error_(c + '.series'); as mensaje) {
+                <p class="error-campo" role="alert">{{ mensaje }}</p>
+              }
+
+              <div class="pie-ejercicio">
+                <ion-button class="secundario" fill="clear" size="small" (click)="agregarSerie(i)">Agregar serie</ion-button>
+                <ion-button class="secundario suave" fill="clear" size="small" (click)="igualar(i)">
+                  Usar las mismas en todas
+                </ion-button>
+              </div>
+            }
           </li>
         }
       </ol>
 
       <ion-button class="agregar" fill="outline" expand="block" (click)="elegirEjercicio()">Agregar ejercicio</ion-button>
+      @if (error_('ejercicios'); as mensaje) {
+        <p class="error-campo" role="alert">{{ mensaje }}</p>
+      }
 
       @if (error()) {
         <p class="error-accion" role="alert">{{ error() }}</p>

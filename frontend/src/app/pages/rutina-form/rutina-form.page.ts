@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonBackButton,
@@ -17,33 +17,40 @@ import { chevronDownOutline, chevronUpOutline, closeOutline, trashOutline } from
 import { finalize, forkJoin, of } from 'rxjs';
 import { LIMITES } from '../../core/config/limites';
 import { Ejercicio } from '../../core/models/ejercicio.model';
-import { DatosRutina, DatosSerie, Rutina } from '../../core/models/rutina.model';
+import { DatosRutina, Rutina } from '../../core/models/rutina.model';
 import { EjerciciosService } from '../../core/services/ejercicios.service';
 import { RutinasService } from '../../core/services/rutinas.service';
 import { mensajeDeError } from '../../core/utils/errores';
-import { etiquetaTipo, valorDe } from '../../core/utils/formato';
+import { etiquetaTipo, formatoDuracion, plural, valorDe } from '../../core/utils/formato';
+import { CampoSerie, entero, Modo, modoDeTipo, SerieEscrita, validarSerie } from '../../core/utils/validaciones';
+import { CampoNumericoComponent } from '../../shared/components/campo-numerico/campo-numerico.component';
 import { SelectorEjercicioComponent } from '../../shared/components/selector-ejercicio/selector-ejercicio.component';
-import { decimal, entero } from '../../core/utils/validaciones';
 
-type Modo = 'conCarga' | 'reps' | 'tiempo';
-
-interface SerieBorrador {
-  repeticiones: string;
-  carga: string;
-  duracion: string;
-}
 interface EjercicioBorrador {
   ejercicioId: string;
-  series: SerieBorrador[];
+  personalizado: boolean;
+  cantidad: string; 
+  base: SerieEscrita; 
+  series: SerieEscrita[]; 
 }
 
-const serieVacia = (): SerieBorrador => ({ repeticiones: '', carga: '', duracion: '' });
+const vacia = (): SerieEscrita => ({ repeticiones: '', carga: '', duracion: '' });
+const igual = (a: SerieEscrita, b: SerieEscrita): boolean =>
+  a.repeticiones === b.repeticiones && a.carga === b.carga && a.duracion === b.duracion;
+
+const valoresPorDefecto = (modo: Modo): SerieEscrita =>
+  modo === 'tiempo' ? { ...vacia(), duracion: '30' } : { ...vacia(), repeticiones: '10' };
+
+const texto = (n: number | null): string => (n === null ? '' : String(n));
 
 @Component({
   selector: 'app-rutina-form',
   templateUrl: './rutina-form.page.html',
   styleUrl: './rutina-form.page.scss',
-  imports: [IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonInput, IonButton, IonIcon, IonSpinner],
+  imports: [
+    IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonInput, IonButton,
+    IonIcon, IonSpinner, CampoNumericoComponent,
+  ],
 })
 export class RutinaFormPage implements OnInit {
   private readonly rutinas = inject(RutinasService);
@@ -51,6 +58,7 @@ export class RutinaFormPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly modales = inject(ModalController);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly id = this.route.snapshot.paramMap.get('id');
   readonly esEdicion = this.id !== null;
@@ -62,9 +70,10 @@ export class RutinaFormPage implements OnInit {
   readonly listo = signal(false);
   readonly errorCarga = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  readonly errores = signal<Record<string, string>>({}); 
   readonly guardando = signal(false);
 
-  readonly valorDe = valorDe;
+  readonly limites = LIMITES;
 
   constructor() {
     addIcons({ chevronUpOutline, chevronDownOutline, trashOutline, closeOutline });
@@ -100,22 +109,36 @@ export class RutinaFormPage implements OnInit {
   }
 
   modoDe(ejercicioId: string): Modo {
-    switch (this.catalogo().get(ejercicioId)?.tipoMedicion) {
-      case 'REPETICIONES_CON_CARGA':
-        return 'conCarga';
-      case 'TIEMPO':
-        return 'tiempo';
-      default:
-        return 'reps';
-    }
+    return modoDeTipo(this.catalogo().get(ejercicioId)?.tipoMedicion);
   }
 
-  // ---- edición del borrador ----
+  // ---- errores por campo ----
+
+  error_(clave: string): string | null {
+    return this.errores()[clave] ?? null;
+  }
+
+  limpiar(clave: string): void {
+    if (!(clave in this.errores())) return;
+    this.errores.update((e) => {
+      const { [clave]: _quitado, ...resto } = e;
+      return resto;
+    });
+  }
+
+  // ---- nombre ----
+
+  cambiarNombre(ev: Event): void {
+    this.nombre.set(valorDe(ev));
+    this.limpiar('nombre');
+  }
+
+  // ---- ejercicios ----
 
   async elegirEjercicio(): Promise<void> {
     this.error.set(null);
     if (this.ejercicios().length >= LIMITES.EJERCICIOS_POR_RUTINA) {
-      this.error.set(`Una rutina admite hasta ${LIMITES.EJERCICIOS_POR_RUTINA} ejercicios.`);
+      this.errores.update((e) => ({ ...e, ejercicios: `Una rutina admite hasta ${LIMITES.EJERCICIOS_POR_RUTINA} ejercicios.` }));
       return;
     }
     const modal = await this.modales.create({
@@ -126,11 +149,18 @@ export class RutinaFormPage implements OnInit {
     await modal.present();
     const { data, role } = await modal.onDidDismiss<Ejercicio>();
     if (role !== 'elegido' || !data) return;
-    this.ejercicios.update((lista) => [...lista, { ejercicioId: data.id, series: [serieVacia()] }]);
+
+    this.limpiar('ejercicios');
+    const modo = modoDeTipo(data.tipoMedicion);
+    this.ejercicios.update((lista) => [
+      ...lista,
+      { ejercicioId: data.id, personalizado: false, cantidad: '3', base: valoresPorDefecto(modo), series: [] },
+    ]);
   }
 
   quitarEjercicio(i: number): void {
     this.ejercicios.update((lista) => lista.filter((_, k) => k !== i));
+    this.errores.set({}); 
   }
 
   mover(i: number, delta: -1 | 1): void {
@@ -141,28 +171,72 @@ export class RutinaFormPage implements OnInit {
       [copia[i], copia[j]] = [copia[j], copia[i]];
       return copia;
     });
+    this.errores.set({});
+  }
+
+
+  cambiarCantidad(i: number, valor: string): void {
+    this.actualizar(i, (e) => ({ ...e, cantidad: valor }));
+    this.limpiar(`e${i}.cantidad`);
+  }
+
+  cambiarBase(i: number, campo: CampoSerie, valor: string): void {
+    this.actualizar(i, (e) => ({ ...e, base: { ...e.base, [campo]: valor } }));
+    this.limpiar(`e${i}.${campo}`);
+  }
+
+  resumen(e: EjercicioBorrador): string {
+    if (e.personalizado) return '';
+    const n = entero(e.cantidad, 1, LIMITES.SERIES_POR_EJERCICIO);
+    const { datos } = validarSerie(this.modoDe(e.ejercicioId), e.base, false);
+    if (n === null || !datos) return '';
+
+    const series = plural(n, 'serie', 'series');
+    if (datos.duracionSegundos !== undefined) return `${series} de ${formatoDuracion(datos.duracionSegundos)}`;
+    const reps = `${series} de ${datos.repeticiones} reps`;
+    return datos.carga !== undefined ? `${reps} con ${datos.carga.toLocaleString('es-AR')} kg` : reps;
+  }
+
+
+  personalizar(i: number): void {
+    this.actualizar(i, (e) => {
+      const n = entero(e.cantidad, 1, LIMITES.SERIES_POR_EJERCICIO) ?? 1;
+      return { ...e, personalizado: true, series: Array.from({ length: n }, () => ({ ...e.base })) };
+    });
+    this.errores.set({});
+  }
+
+  igualar(i: number): void {
+    this.actualizar(i, (e) => ({
+      ...e,
+      personalizado: false,
+      cantidad: String(e.series.length),
+      base: { ...e.series[0] },
+    }));
+    this.errores.set({});
+  }
+
+  cambiarSerie(i: number, j: number, campo: CampoSerie, valor: string): void {
+    this.actualizar(i, (e) => ({
+      ...e,
+      series: e.series.map((s, k) => (k === j ? { ...s, [campo]: valor } : s)),
+    }));
+    this.limpiar(`e${i}.s${j}.${campo}`);
   }
 
   agregarSerie(i: number): void {
     const actual = this.ejercicios()[i];
     if (actual.series.length >= LIMITES.SERIES_POR_EJERCICIO) {
-      this.error.set(`Un ejercicio admite hasta ${LIMITES.SERIES_POR_EJERCICIO} series.`);
+      this.errores.update((e) => ({ ...e, [`e${i}.series`]: `Un ejercicio admite hasta ${LIMITES.SERIES_POR_EJERCICIO} series.` }));
       return;
     }
-    this.error.set(null);
+    this.limpiar(`e${i}.series`);
     this.actualizar(i, (e) => ({ ...e, series: [...e.series, { ...e.series[e.series.length - 1] }] }));
   }
 
   quitarSerie(i: number, j: number): void {
     this.actualizar(i, (e) => ({ ...e, series: e.series.filter((_, k) => k !== j) }));
-  }
-
-  cambiar(i: number, j: number, campo: keyof SerieBorrador, ev: Event): void {
-    const valor = valorDe(ev);
-    this.actualizar(i, (e) => ({
-      ...e,
-      series: e.series.map((s, k) => (k === j ? { ...s, [campo]: valor } : s)),
-    }));
+    this.errores.set({});
   }
 
   private actualizar(i: number, cambio: (e: EjercicioBorrador) => EjercicioBorrador): void {
@@ -172,23 +246,32 @@ export class RutinaFormPage implements OnInit {
   private cargarBorrador(r: Rutina): void {
     this.nombre.set(r.nombre);
     this.ejercicios.set(
-      r.ejercicios.map((e) => ({
-        ejercicioId: e.ejercicioId,
-        series: e.series.map((s) => ({
-          repeticiones: s.repeticiones === null ? '' : String(s.repeticiones),
-          carga: s.carga === null ? '' : String(s.carga),
-          duracion: s.duracionSegundos === null ? '' : String(s.duracionSegundos),
-        })),
-      })),
+      r.ejercicios.map((e) => {
+        const series: SerieEscrita[] = e.series.map((s) => ({
+          repeticiones: texto(s.repeticiones),
+          carga: texto(s.carga),
+          duracion: texto(s.duracionSegundos),
+        }));
+        const todasIguales = series.every((s) => igual(s, series[0]));
+        return {
+          ejercicioId: e.ejercicioId,
+          personalizado: !todasIguales,
+          cantidad: String(series.length),
+          base: { ...series[0] },
+          series: todasIguales ? [] : series,
+        };
+      }),
     );
   }
 
   // ---- guardar ----
 
   guardar(): void {
-    const { datos, aviso } = this.construir();
+    const { datos, errores } = this.construir();
+    this.errores.set(errores);
     if (!datos) {
-      this.error.set(aviso ?? 'Revisá los datos de la rutina.');
+      this.error.set('Revisá los campos marcados en rojo.');
+      this.irAlPrimerError();
       return;
     }
     this.error.set(null);
@@ -201,48 +284,49 @@ export class RutinaFormPage implements OnInit {
     });
   }
 
-  private construir(): { datos?: DatosRutina; aviso?: string } {
+  private construir(): { datos?: DatosRutina; errores: Record<string, string> } {
+    const errores: Record<string, string> = {};
     const nombre = this.nombre().trim();
-    if (!nombre) return { aviso: 'Ponele un nombre a la rutina.' };
-    if (nombre.length > LIMITES.NOMBRE_MAX) {
-      return { aviso: `El nombre puede tener hasta ${LIMITES.NOMBRE_MAX} caracteres.` };
-    }
+    if (!nombre) errores['nombre'] = 'Ponele un nombre a la rutina.';
+    else if (nombre.length > LIMITES.NOMBRE_MAX) errores['nombre'] = `El nombre puede tener hasta ${LIMITES.NOMBRE_MAX} caracteres.`;
+
     const lista = this.ejercicios();
-    if (lista.length === 0) return { aviso: 'Agregá al menos un ejercicio.' };
+    if (lista.length === 0) errores['ejercicios'] = 'Agregá al menos un ejercicio.';
 
     const ejercicios: DatosRutina['ejercicios'] = [];
-    for (const e of lista) {
+    lista.forEach((e, i) => {
       const modo = this.modoDe(e.ejercicioId);
-      const series: DatosSerie[] = [];
 
-      for (const [j, s] of e.series.entries()) {
-        const donde = `${this.nombreDe(e.ejercicioId)}, serie ${j + 1}`;
-
-        if (modo === 'tiempo') {
-          const d = entero(s.duracion, 1, LIMITES.DURACION_MAX_SEGUNDOS);
-          if (d === null) {
-            return { aviso: `${donde}: la duración tiene que ser un número entero de segundos, entre 1 y ${LIMITES.DURACION_MAX_SEGUNDOS}.` };
-          }
-          series.push({ duracionSegundos: d });
-          continue;
+      if (!e.personalizado) {
+        const n = entero(e.cantidad, 1, LIMITES.SERIES_POR_EJERCICIO);
+        if (n === null) errores[`e${i}.cantidad`] = `Poné entre 1 y ${LIMITES.SERIES_POR_EJERCICIO} series.`;
+        const v = validarSerie(modo, e.base, false);
+        for (const [campo, mensaje] of Object.entries(v.errores)) errores[`e${i}.${campo}`] = mensaje;
+        if (n !== null && v.datos) {
+          ejercicios.push({ ejercicioId: e.ejercicioId, series: Array.from({ length: n }, () => ({ ...v.datos! })) });
         }
-
-        const r = entero(s.repeticiones, 1, LIMITES.REPETICIONES_MAX);
-        if (r === null) {
-          return { aviso: `${donde}: las repeticiones tienen que ser un número entero, entre 1 y ${LIMITES.REPETICIONES_MAX}.` };
-        }
-        if (modo === 'reps' || s.carga.trim() === '') {
-          series.push({ repeticiones: r }); // en el plan, la carga es opcional
-          continue;
-        }
-        const c = decimal(s.carga, LIMITES.CARGA_MAX_KG);
-        if (c === null) {
-          return { aviso: `${donde}: la carga tiene que ser mayor a 0 y hasta ${LIMITES.CARGA_MAX_KG} kg, con hasta 2 decimales.` };
-        }
-        series.push({ repeticiones: r, carga: c });
+        return;
       }
-      ejercicios.push({ ejercicioId: e.ejercicioId, series });
-    }
-    return { datos: { nombre, ejercicios } };
+
+      const series: DatosRutina['ejercicios'][number]['series'] = [];
+      e.series.forEach((s, j) => {
+        const v = validarSerie(modo, s, false);
+        for (const [campo, mensaje] of Object.entries(v.errores)) errores[`e${i}.s${j}.${campo}`] = mensaje;
+        if (v.datos) series.push(v.datos);
+      });
+      if (series.length === e.series.length) ejercicios.push({ ejercicioId: e.ejercicioId, series });
+    });
+
+    return Object.keys(errores).length > 0 ? { errores } : { datos: { nombre, ejercicios }, errores };
+  }
+
+  private irAlPrimerError(): void {
+    setTimeout(() => {
+      const el = this.host.nativeElement.querySelector<HTMLElement>('.error-campo, [aria-invalid="true"]');
+      if (!el) return;
+      const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ block: 'center', behavior: sinMovimiento ? 'auto' : 'smooth' });
+      if (el.tagName === 'INPUT') el.focus({ preventScroll: true });
+    });
   }
 }

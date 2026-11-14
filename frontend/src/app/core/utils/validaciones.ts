@@ -3,6 +3,8 @@ import { TipoMedicion } from '../models/ejercicio.model';
 import { DatosSerie } from '../models/rutina.model';
 
 export type Modo = 'conCarga' | 'reps' | 'tiempo';
+export type CampoSerie = 'repeticiones' | 'carga' | 'duracion';
+export type ErroresSerie = Partial<Record<CampoSerie, string>>;
 
 export function modoDeTipo(tipo?: TipoMedicion): Modo {
   switch (tipo) {
@@ -51,4 +53,34 @@ export function armarSerieReal(modo: Modo, b: SerieEscrita): { datos?: DatosSeri
   return c === null
     ? { aviso: `Cargá el peso: mayor a 0 y hasta ${LIMITES.CARGA_MAX_KG} kg, con hasta 2 decimales.` }
     : { datos: { repeticiones: r, carga: c } };
+}
+
+export function validarSerie(
+  modo: Modo,
+  b: SerieEscrita,
+  cargaObligatoria: boolean,
+): { datos?: DatosSerie; errores: ErroresSerie } {
+  const errores: ErroresSerie = {};
+  const datos: DatosSerie = {};
+
+  if (modo === 'tiempo') {
+    const d = entero(b.duracion, 1, LIMITES.DURACION_MAX_SEGUNDOS);
+    if (d === null) errores.duracion = `Poné los segundos, un número entero entre 1 y ${LIMITES.DURACION_MAX_SEGUNDOS}.`;
+    else datos.duracionSegundos = d;
+  } else {
+    const r = entero(b.repeticiones, 1, LIMITES.REPETICIONES_MAX);
+    if (r === null) errores.repeticiones = `Poné un número entero entre 1 y ${LIMITES.REPETICIONES_MAX}.`;
+    else datos.repeticiones = r;
+
+    if (modo === 'conCarga') {
+      if (b.carga.trim() === '') {
+        if (cargaObligatoria) errores.carga = 'Cargá el peso que usaste.';
+      } else {
+        const c = decimal(b.carga, LIMITES.CARGA_MAX_KG);
+        if (c === null) errores.carga = `Poné un peso mayor a 0 y hasta ${LIMITES.CARGA_MAX_KG} kg, con hasta 2 decimales.`;
+        else datos.carga = c;
+      }
+    }
+  }
+  return Object.keys(errores).length > 0 ? { errores } : { datos, errores };
 }
