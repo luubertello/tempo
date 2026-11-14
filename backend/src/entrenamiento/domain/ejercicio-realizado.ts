@@ -4,6 +4,7 @@ import { LimiteExcedido } from './errores-rutina';
 import { LIMITES } from './limites';
 import { DatosSerie } from './serie-planificada';
 import { SerieRealizada } from './serie-realizada';
+import { Balance, calcularBalance } from './balance';
 
 export enum ResultadoEjercicio {
   OMITIDO = 'OMITIDO',
@@ -40,6 +41,10 @@ export class EjercicioRealizado {
     if (conObjetivo.length === 0) return ResultadoEjercicio.SIN_PLAN;
     if (conObjetivo.length !== this._series.length) return ResultadoEjercicio.MODIFICADO; // series extra
     return this._series.every((s) => s.cumpleObjetivo()) ? ResultadoEjercicio.CUMPLIDO : ResultadoEjercicio.MODIFICADO;
+  }
+
+    balance(): Balance {
+    return calcularBalance(this._series);
   }
 
   registrarSerie(tipo: TipoMedicion, datos: DatosSerie): SerieRealizada {

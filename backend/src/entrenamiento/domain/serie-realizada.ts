@@ -2,6 +2,7 @@ import { TipoMedicion } from '../../catalogo/domain/tipo-medicion';
 import { SerieIncoherente } from './errores-rutina';
 import { DatosSerie, SeriePlanificada } from './serie-planificada';
 import { validarCarga, validarDuracion, validarRepeticiones } from './valores';
+import { calcularDiferencia, Diferencia, VeredictoSerie, veredictoDe } from './veredicto';
 
 export interface Objetivo {
   repeticiones: number | null;
@@ -114,13 +115,22 @@ export class SerieRealizada {
     return new SerieRealizada(this.orden, false, null, null, null, this.objetivo);
   }
 
+  veredicto(): VeredictoSerie {
+    if (!this.completada) return VeredictoSerie.SIN_HACER;
+    if (!this.objetivo) return VeredictoSerie.EXTRA;
+    return veredictoDe(this.diferencia()!);
+  }
+
+  diferencia(): Diferencia | null {
+    if (!this.completada || !this.objetivo) return null;
+    return calcularDiferencia(this.objetivo, {
+      repeticiones: this.repeticiones,
+      carga: this.carga,
+      duracionSegundos: this.duracionSegundos,
+    });
+  }
+
   cumpleObjetivo(): boolean {
-    if (!this.completada || !this.objetivo) return false;
-    const o = this.objetivo;
-    return (
-      (o.repeticiones === null || o.repeticiones === this.repeticiones) &&
-      (o.carga === null || o.carga === this.carga) &&
-      (o.duracionSegundos === null || o.duracionSegundos === this.duracionSegundos)
-    );
+    return this.veredicto() === VeredictoSerie.CUMPLIDA;
   }
 }

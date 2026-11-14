@@ -16,6 +16,7 @@ import { Rutina, TiposDeMedicion } from './rutina';
 import { DatosSerie, SeriePlanificada } from './serie-planificada';
 import { Objetivo, SerieRealizada } from './serie-realizada';
 import { validarFechaSesion } from './valores';
+import { Balance, calcularBalance } from './balance';
 
 export interface DatosSerieReal extends DatosSerie {
   completada: boolean;
@@ -132,6 +133,10 @@ export class Sesion {
 
   cantidadSeriesCompletadas(): number {
     return this._ejercicios.reduce((n, e) => n + e.series.filter((s) => s.completada).length, 0);
+  }
+
+  balance(): Balance {
+    return calcularBalance(this._ejercicios.flatMap((e) => e.series));
   }
 
   agregarEjercicio(ejercicioId: string, tipos: TiposDeMedicion): void {
