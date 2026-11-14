@@ -1,0 +1,23 @@
+.veredicto,
+.feedback {
+  --color-v: var(--tempo-tinta-suave);
+  color: var(--color-v);
+  font-weight: 600;
+
+  &[data-v='CUMPLIDA'],
+  &[data-v='SUPERADA'] {
+    --color-v: color-mix(in srgb, var(--tempo-ok) 72%, var(--tempo-tinta));
+  }
+  &[data-v='POR_DEBAJO'] {
+    --color-v: color-mix(in srgb, var(--tempo-aviso) 62%, var(--tempo-tinta));
+  }
+  &[data-v='DISTINTA'] {
+    --color-v: var(--tempo-tinta);
+  }
+}
+
+.simbolo {
+  display: inline-block;
+  min-width: 1.1em;
+  font-weight: 700;
+}

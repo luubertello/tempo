@@ -8,24 +8,29 @@ import {
   IonContent,
   IonDatetime,
   IonHeader,
-  IonInput,
   IonModal,
   IonSpinner,
   IonToolbar,
 } from '@ionic/angular';
 import { finalize, forkJoin, Observable, switchMap } from 'rxjs';
+import { LIMITES } from '../../core/config/limites';
 import { Ejercicio } from '../../core/models/ejercicio.model';
 import { EjercicioDeSesion, SerieDeSesion, Sesion } from '../../core/models/sesion.model';
 import { EjerciciosService } from '../../core/services/ejercicios.service';
 import { SesionesService } from '../../core/services/sesiones.service';
 import { mensajeDeError } from '../../core/utils/errores';
-import { formatoFecha, plural, textoSerie, valorDe } from '../../core/utils/formato';
-import { difiereDelObjetivo, etiquetaResultado, seriesHechas } from '../../core/utils/sesion';
+import { formatoFecha, isoHaceDias, plural, textoSerie } from '../../core/utils/formato';
 import { armarSerieReal, Modo, modoDeTipo, SerieEscrita } from '../../core/utils/validaciones';
-import { CompasComponent } from '../../shared/components/compas/compas.component';
-import { LIMITES } from '../../core/config/limites';
-import { estadosDeEjercicio } from '../../core/utils/veredicto';
+import {
+  estadosDeEjercicio,
+  frase,
+  lineasDeBalance,
+  resumenDeEjercicio,
+  simboloDe,
+  titularDeBalance,
+} from '../../core/utils/veredicto';
 import { CampoNumericoComponent } from '../../shared/components/campo-numerico/campo-numerico.component';
+import { CompasComponent } from '../../shared/components/compas/compas.component';
 
 interface Edicion {
   ejercicio: number;
@@ -39,8 +44,8 @@ const texto = (n: number | null | undefined): string => (n === null || n === und
   templateUrl: './historial-detalle.page.html',
   styleUrl: './historial-detalle.page.scss',
   imports: [
-    IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonButton,
-    IonSpinner, IonModal, IonDatetime, RouterLink, CompasComponent, CampoNumericoComponent
+    IonHeader, IonToolbar, IonButtons, IonBackButton, IonContent, IonButton, IonSpinner,
+    IonModal, IonDatetime, RouterLink, CompasComponent, CampoNumericoComponent,
   ],
 })
 export class HistorialDetallePage {
@@ -57,33 +62,29 @@ export class HistorialDetallePage {
   readonly errorEdicion = signal<string | null>(null);
   readonly trabajando = signal(false);
 
-  readonly limites = LIMITES;
-  readonly estadosDe = (e: EjercicioDeSesion) => estadosDeEjercicio(e, this.sesion()?.estado === 'EN_CURSO');
-
   readonly edicion = signal<Edicion | null>(null);
   readonly borrador = signal<SerieEscrita>({ repeticiones: '', carga: '', duracion: '' });
   readonly cambiandoFecha = signal(false);
 
   readonly editable = computed(() => this.sesion()?.estado === 'FINALIZADA');
   readonly titulo = computed(() => this.sesion()?.nombreRutina ?? 'Entrenamiento libre');
-  readonly resumen = computed(() => {
+  readonly titular = computed(() => {
     const s = this.sesion();
-    if (!s) return '';
-    const hechas = s.ejercicios.reduce((n, e) => n + seriesHechas(e), 0);
-    return `${plural(s.ejercicios.length, 'ejercicio', 'ejercicios')}, ${plural(hechas, 'serie completada', 'series completadas')}`;
+    return s ? titularDeBalance(s.balance) : '';
+  });
+  readonly lineas = computed(() => {
+    const s = this.sesion();
+    return s ? lineasDeBalance(s.balance) : [];
   });
 
-  readonly hoy = (() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  })();
-
+  readonly hoy = isoHaceDias(0);
+  readonly limites = LIMITES;
   readonly formatoFecha = formatoFecha;
   readonly textoSerie = textoSerie;
-  readonly valorDe = valorDe;
-  readonly seriesHechas = seriesHechas;
-  readonly difiere = difiereDelObjetivo;
-  readonly etiquetaResultado = etiquetaResultado;
+  readonly frase = frase;
+  readonly simbolo = simboloDe;
+  readonly resumenDe = resumenDeEjercicio;
+  readonly estadosDe = (e: EjercicioDeSesion) => estadosDeEjercicio(e, this.sesion()?.estado === 'EN_CURSO');
 
   ionViewWillEnter(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -104,6 +105,10 @@ export class HistorialDetallePage {
 
   modoDe(ejercicioId: string): Modo {
     return modoDeTipo(this.catalogo().get(ejercicioId)?.tipoMedicion);
+  }
+
+  conPlan(e: EjercicioDeSesion): boolean {
+    return e.series.some((s) => s.objetivo !== null);
   }
 
   esEdicion(e: EjercicioDeSesion, s: SerieDeSesion): boolean {
@@ -130,7 +135,7 @@ export class HistorialDetallePage {
     this.errorEdicion.set(null);
   }
 
-    fijar(campo: keyof SerieEscrita, valor: string): void {
+  fijar(campo: keyof SerieEscrita, valor: string): void {
     this.borrador.update((b) => ({ ...b, [campo]: valor }));
   }
 

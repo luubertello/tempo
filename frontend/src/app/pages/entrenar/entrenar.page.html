@@ -5,10 +5,10 @@
         <p>{{ errorCarga() }}</p>
         <ion-button fill="clear" (click)="cargar()">Reintentar</ion-button>
       </div>
-    } @else if (cargando() && !sesion() && rutinas().length === 0) {
+    } @else if (cargando() && !sesion() && !cierre() && rutinas().length === 0) {
       <ion-spinner class="cargando" name="dots" />
     } @else if (sesion(); as s) {
-      <!-- Entrenamiento en curso -->
+      <!-- ================= Entrenamiento en curso ================= -->
       <div class="encabezado-sesion">
         <h1>{{ titulo() }}</h1>
         <span class="detalle">{{ fecha() }}</span>
@@ -20,100 +20,150 @@
 
       <ol class="ejercicios">
         @for (e of s.ejercicios; track e.orden) {
-          @let modo = modoDe(e.ejercicioId);
-          @let b = borradores()[e.orden];
-          <li class="ejercicio" [class.omitido]="e.omitido">
-            <div class="cabecera">
-              <span class="orden">{{ e.orden }}</span>
-              <div class="titulo-ejercicio">
-                <h2>{{ nombreDe(e.ejercicioId) }}</h2>
-                <span class="detalle">{{ detalleDe(e) }}</span>
+          @if (e.orden === activo()?.orden) {
+            @let modo = modoDe(e.ejercicioId);
+            @let b = borradores()[e.orden];
+            @let activa = serieActiva(e);
+
+            <li class="ejercicio abierto">
+              <div class="cabecera">
+                <span class="orden">{{ e.orden }}</span>
+                <div class="titulo-ejercicio">
+                  <h2>{{ nombreDe(e.ejercicioId) }}</h2>
+                  <span class="detalle">{{ detalleDe(e) }}</span>
+                </div>
+                @if (e.series.length > 0) {
+                  <app-compas [estados]="estadosDe(e)" />
+                }
               </div>
-              @if (e.series.length > 0) {
-            <app-compas [estados]="estadosDe(e)" />
-              }
-            </div>
 
-            <div class="series">
-              @for (f of filas(e); track f.orden) {
-                @switch (f.tipo) {
-                  @case ('hecha') {
-                    <div class="serie">
-                      <span class="num">{{ f.orden }}</span>
-                      <span class="valor">
-                        {{ textoSerie(f.serie!) }}
-                        @if (f.serie!.objetivo && difiere(f.serie!)) {
-                          <span class="nota">objetivo {{ textoSerie(f.serie!.objetivo) }}</span>
-                        }
-                      </span>
-                    </div>
-                  }
-                  @case ('pendiente') {
-                    <div class="serie pendiente">
-                      <span class="num">{{ f.orden }}</span>
-                      <span class="valor">
-                        @if (f.serie?.objetivo; as o) {
-                          {{ textoSerie(o) }}
-                        } @else {
-                          Pendiente
-                        }
-                      </span>
-                    </div>
-                  }
-                  @case ('entrada') {
-                    <div class="serie entrada">
-                      <span class="num">{{ f.orden }}</span>
-                      <div class="entrada-cuerpo">
-                        <div class="campos" [class.dos]="modo === 'conCarga'">
-                          @switch (modo) {
-                            @case ('conCarga') {
-                              <ion-input type="number" inputmode="numeric" label="Reps" labelPlacement="stacked" fill="outline"
-                                [value]="b?.repeticiones" (ionInput)="cambiar(e.orden, 'repeticiones', $event)" />
-                              <ion-input type="number" inputmode="decimal" label="Carga (kg)" labelPlacement="stacked" fill="outline"
-                                [value]="b?.carga" (ionInput)="cambiar(e.orden, 'carga', $event)" />
-                            }
-                            @case ('reps') {
-                              <ion-input type="number" inputmode="numeric" label="Reps" labelPlacement="stacked" fill="outline"
-                                [value]="b?.repeticiones" (ionInput)="cambiar(e.orden, 'repeticiones', $event)" />
-                            }
-                            @case ('tiempo') {
-                              <ion-input type="number" inputmode="numeric" label="Duración (seg)" labelPlacement="stacked" fill="outline"
-                                [value]="b?.duracion" (ionInput)="cambiar(e.orden, 'duracion', $event)" />
-                            }
-                          }
-                        </div>
-
-                        @if (f.serie?.objetivo; as o) {
-                          <span class="nota">Objetivo: {{ textoSerie(o) }}</span>
-                        } @else if (e.series.length > 0) {
-                          <span class="nota">Serie extra, fuera del plan.</span>
-                        }
-
-                        <ion-button class="registrar" expand="block" [disabled]="registrando() !== null"
-                          (click)="registrar(e)">
-                          @if (registrando() === e.orden) {
-                            <ion-spinner name="dots" />
-                          } @else {
-                            Registrar serie {{ f.orden }}
-                          }
-                        </ion-button>
-
-                        @if (errorSerie()?.orden === e.orden) {
-                          <p class="error-accion" role="alert">{{ errorSerie()?.mensaje }}</p>
-                        }
-                      </div>
-                    </div>
+              <!-- Lo que dijo el back de la última serie registrada -->
+              <div class="zona-feedback" role="status" aria-live="polite">
+                @if (registro(); as r) {
+                  @if (r.ejercicio === e.orden) {
+                    <p class="feedback" [attr.data-v]="r.veredicto">
+                      <span class="simbolo" aria-hidden="true">{{ simbolo(r.veredicto) }}</span>
+                      {{ r.texto }}
+                    </p>
                   }
                 }
-              }
-            </div>
+              </div>
 
-            @if (e.series.length > 0 && !e.omitido) {
-              <ion-button class="omitir" fill="clear" size="small" [disabled]="trabajando()" (click)="omitir(e)">
-                Omitir ejercicio
-              </ion-button>
-            }
-          </li>
+              <!-- Series del ejercicio, cada una con su veredicto -->
+              @if (e.series.length > 0) {
+                <ul class="lista-series">
+                  @for (x of e.series; track x.orden) {
+                    <li class="serie" [class.actual]="x.orden === activa?.orden">
+                      <span class="num">{{ x.orden }}</span>
+                      @if (x.completada) {
+                        <span class="valor">{{ textoSerie(x) }}</span>
+                        <span class="veredicto" [attr.data-v]="x.veredicto">
+                          <span class="simbolo" aria-hidden="true">{{ simbolo(x.veredicto) }}</span>
+                          {{ frase(x) }}
+                        </span>
+                      } @else {
+                        <span class="valor pendiente">
+                          @if (x.objetivo; as o) {
+                            Objetivo {{ textoSerie(o) }}
+                          } @else {
+                            Pendiente
+                          }
+                        </span>
+                        @if (x.orden === activa?.orden) {
+                          <span class="ahora">Ahora</span>
+                        }
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (mostrarEntrada(e)) {
+                <!-- La serie que toca registrar -->
+                <section class="tarjeta-serie" [attr.aria-label]="tituloSerie(e)">
+                  <h3>{{ tituloSerie(e) }}</h3>
+
+                  @if (activa?.objetivo; as o) {
+                    <p class="objetivo">
+                      <span class="etiqueta">Objetivo</span>
+                      <span class="objetivo-valor">{{ textoSerie(o) }}</span>
+                    </p>
+                  } @else {
+                    <p class="sin-objetivo">{{ textoSinObjetivo(e) }}</p>
+                  }
+
+                  <div class="campos">
+                    @switch (modo) {
+                      @case ('conCarga') {
+                        <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                          [maximo]="limites.REPETICIONES_MAX" [valor]="b?.repeticiones ?? ''"
+                          (valorChange)="escribir(e.orden, 'repeticiones', $event)" />
+                        <app-campo-numerico etiqueta="Carga" unidad="kg" [paso]="2.5" [minimo]="0.5"
+                          [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="b?.carga ?? ''"
+                          (valorChange)="escribir(e.orden, 'carga', $event)" />
+                      }
+                      @case ('reps') {
+                        <app-campo-numerico etiqueta="Repeticiones" unidad="reps" [paso]="1" [minimo]="1"
+                          [maximo]="limites.REPETICIONES_MAX" [valor]="b?.repeticiones ?? ''"
+                          (valorChange)="escribir(e.orden, 'repeticiones', $event)" />
+                      }
+                      @case ('tiempo') {
+                        <app-campo-numerico etiqueta="Duración" unidad="seg" [paso]="5" [minimo]="1"
+                          [maximo]="limites.DURACION_MAX_SEGUNDOS" [valor]="b?.duracion ?? ''"
+                          (valorChange)="escribir(e.orden, 'duracion', $event)" />
+                      }
+                    }
+                  </div>
+
+                  <ion-button class="registrar" expand="block" [disabled]="registrando() !== null" (click)="registrar(e)">
+                    @if (registrando() === e.orden) {
+                      <ion-spinner name="dots" />
+                    } @else {
+                      Registrar serie {{ numeroSerie(e) }}
+                    }
+                  </ion-button>
+
+                  @if (errorSerie()?.orden === e.orden) {
+                    <p class="error-accion" role="alert">{{ errorSerie()?.mensaje }}</p>
+                  }
+                </section>
+              } @else {
+                <!-- Se terminó el plan de este ejercicio -->
+                <div class="listo">
+                  <p>Terminaste las series de este ejercicio.</p>
+                  @if (siguiente(e); as sig) {
+                    <ion-button class="registrar" expand="block" (click)="abrir(sig.orden)">
+                      Siguiente: {{ nombreDe(sig.ejercicioId) }}
+                    </ion-button>
+                  }
+                  <ion-button class="secundario" fill="clear" size="small" (click)="extra.set(e.orden)">
+                    Agregar serie extra
+                  </ion-button>
+                </div>
+              }
+
+              @if (e.series.length > 0 && !e.omitido) {
+                <ion-button class="omitir" fill="clear" size="small" [disabled]="trabajando()" (click)="omitir(e)">
+                  Omitir ejercicio
+                </ion-button>
+              }
+            </li>
+          } @else {
+            <!-- Ejercicio cerrado: fila compacta -->
+            <li class="ejercicio" [class.omitido]="e.omitido">
+              <button type="button" class="fila-ejercicio" (click)="abrir(e.orden)"
+                [attr.aria-label]="'Abrir ' + nombreDe(e.ejercicioId)">
+                <span class="orden">{{ e.orden }}</span>
+                <span class="datos">
+                  <span class="nombre">{{ nombreDe(e.ejercicioId) }}</span>
+                  <span class="detalle">{{ detalleDe(e) }}</span>
+                </span>
+                @if (e.series.length > 0) {
+                  <app-compas [estados]="estadosDe(e)" />
+                }
+              </button>
+            </li>
+          }
         }
       </ol>
 
@@ -131,13 +181,41 @@
       <ion-button class="abandonar" fill="clear" [disabled]="trabajando()" (click)="confirmarAbandonar()">
         Abandonar entrenamiento
       </ion-button>
-    } @else {
-      <!-- Sin entrenamiento en curso -->
-      <h1>Entrenar</h1>
+    } @else if (cierre(); as fin) {
+      <!-- ================= Cierre: cómo te fue ================= -->
+      <p class="detalle">Entrenamiento guardado</p>
+      <h1 class="titular">{{ titularCierre() }}</h1>
 
-      @if (terminado()) {
-        <p class="logro" role="status">{{ terminado() }}</p>
+      @if (lineasCierre().length > 0) {
+        <ul class="balance">
+          @for (l of lineasCierre(); track l.veredicto) {
+            <li class="veredicto" [attr.data-v]="l.veredicto">
+              <span class="simbolo" aria-hidden="true">{{ l.simbolo }}</span>
+              {{ l.texto }}
+            </li>
+          }
+        </ul>
       }
+
+      <ul class="filas cierre-ejercicios">
+        @for (e of fin.ejercicios; track e.orden) {
+          <li>
+            <div class="fila">
+              <span class="datos">
+                <span class="nombre">{{ nombreDe(e.ejercicioId) }}</span>
+                <span class="detalle">{{ detalleDe(e) }}</span>
+              </span>
+              <app-compas [estados]="estadosFin(e)" />
+            </div>
+          </li>
+        }
+      </ul>
+
+      <ion-button class="principal" expand="block" [routerLink]="['/historial', fin.id]">Ver el detalle</ion-button>
+      <ion-button class="secundario" fill="clear" (click)="cerrarResumen()">Listo</ion-button>
+    } @else {
+      <!-- ================= Sin entrenamiento en curso ================= -->
+      <h1>Entrenar</h1>
 
       <ion-button class="principal" expand="block" [disabled]="iniciando() !== null" (click)="iniciar()">
         @if (iniciando() === 'libre') {

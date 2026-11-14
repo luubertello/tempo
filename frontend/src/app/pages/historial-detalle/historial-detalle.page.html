@@ -20,14 +20,27 @@
           </ion-button>
         }
       </div>
-      <p class="intro">{{ resumen() }}</p>
 
-      @if (s.estado === 'ABANDONADA') {
+      @if (s.estado === 'FINALIZADA') {
+        <section class="resumen" aria-label="Resultado del entrenamiento">
+          <p class="titular">{{ titular() }}</p>
+          @if (lineas().length > 0) {
+            <ul class="balance">
+              @for (l of lineas(); track l.veredicto) {
+                <li class="veredicto" [attr.data-v]="l.veredicto">
+                  <span class="simbolo" aria-hidden="true">{{ l.simbolo }}</span>
+                  {{ l.texto }}
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      } @else if (s.estado === 'ABANDONADA') {
         <p class="intro">
           Este entrenamiento se abandonó, no cuenta en tus estadísticas y no se puede corregir. Si no lo querés,
           eliminalo.
         </p>
-      } @else if (s.estado === 'EN_CURSO') {
+      } @else {
         <p class="intro">Este entrenamiento está en curso.</p>
         <ion-button class="principal" expand="block" routerLink="/entrenar">Seguir entrenando</ion-button>
       }
@@ -35,26 +48,37 @@
       <ol class="ejercicios">
         @for (e of s.ejercicios; track e.orden) {
           @let modo = modoDe(e.ejercicioId);
+          @let plan = conPlan(e);
           <li class="ejercicio" [class.omitido]="e.omitido">
             <div class="cabecera">
               <span class="orden">{{ e.orden }}</span>
               <div class="titulo-ejercicio">
                 <h2>{{ nombreDe(e.ejercicioId) }}</h2>
-                @if (etiquetaResultado(e.resultado); as r) {
-                  <span class="resultado" [attr.data-resultado]="e.resultado">{{ r }}</span>
-                }
+                <span class="detalle">{{ resumenDe(e) }}</span>
               </div>
               @if (e.series.length > 0) {
                 <app-compas [estados]="estadosDe(e)" />
               }
             </div>
 
-            <div class="series">
+            <div class="series" [class.con-plan]="plan">
+              @if (plan) {
+                <div class="encabezado" aria-hidden="true">
+                  <span></span>
+                  <span>Plan</span>
+                  <span>Hiciste</span>
+                </div>
+              }
+
               @for (x of e.series; track x.orden) {
                 @if (esEdicion(e, x)) {
                   <div class="serie edicion">
                     <span class="num">{{ x.orden }}</span>
                     <div class="entrada-cuerpo">
+                      @if (x.objetivo; as o) {
+                        <p class="plan-edicion">Plan: <strong>{{ textoSerie(o) }}</strong></p>
+                      }
+
                       <div class="campos">
                         @switch (modo) {
                           @case ('conCarga') {
@@ -77,10 +101,6 @@
                           }
                         }
                       </div>
-
-                      @if (x.objetivo; as o) {
-                        <span class="nota">Objetivo: {{ textoSerie(o) }}</span>
-                      }
 
                       <ion-button class="registrar" expand="block" [disabled]="trabajando()" (click)="guardarEdicion(e, x)">
                         Guardar cambios
@@ -105,23 +125,38 @@
                 } @else {
                   <div class="serie" [class.no-hecha]="!x.completada">
                     <span class="num">{{ x.orden }}</span>
-                    <span class="valor">
+
+                    @if (plan) {
+                      <span class="plan">
+                        @if (x.objetivo; as o) {
+                          {{ textoSerie(o) }}
+                        } @else {
+                          –
+                        }
+                      </span>
+                    }
+
+                    <span class="hizo">
                       @if (x.completada) {
                         {{ textoSerie(x) }}
-                        @if (x.objetivo && difiere(x)) {
-                          <span class="nota">objetivo {{ textoSerie(x.objetivo) }}</span>
-                        }
                       } @else {
-                        No hecha
-                        @if (x.objetivo; as o) {
-                          <span class="nota">objetivo {{ textoSerie(o) }}</span>
-                        }
+                        {{ e.omitido ? 'Omitida' : 'No hecha' }}
                       }
                     </span>
+
                     @if (editable()) {
-                      <ion-button fill="clear" size="small" [disabled]="trabajando()" (click)="editar(e, x)">
+                      <ion-button class="corregir" fill="clear" size="small" [disabled]="trabajando()"
+                        [attr.aria-label]="(x.completada ? 'Corregir' : 'Completar') + ' la serie ' + x.orden"
+                        (click)="editar(e, x)">
                         {{ x.completada ? 'Corregir' : 'Completar' }}
                       </ion-button>
+                    }
+
+                    @if (x.completada) {
+                      <span class="veredicto" [attr.data-v]="x.veredicto">
+                        <span class="simbolo" aria-hidden="true">{{ simbolo(x.veredicto) }}</span>
+                        {{ frase(x) }}
+                      </span>
                     }
                   </div>
                 }

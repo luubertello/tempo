@@ -1,34 +1,36 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AlertController, IonButton, IonContent, IonInput, IonSpinner, ModalController } from '@ionic/angular';
+import { AlertController, IonButton, IonContent, IonSpinner, ModalController } from '@ionic/angular';
 import { finalize, forkJoin, switchMap } from 'rxjs';
 import { LIMITES } from '../../core/config/limites';
 import { Ejercicio } from '../../core/models/ejercicio.model';
-import { DatosSerie, Rutina } from '../../core/models/rutina.model';
-import { EjercicioDeSesion, SerieDeSesion, Sesion } from '../../core/models/sesion.model';
+import { Rutina } from '../../core/models/rutina.model';
+import { EjercicioDeSesion, SerieDeSesion, Sesion, Veredicto } from '../../core/models/sesion.model';
 import { EjerciciosService } from '../../core/services/ejercicios.service';
 import { RutinasService } from '../../core/services/rutinas.service';
 import { SesionesService } from '../../core/services/sesiones.service';
 import { mensajeDeError } from '../../core/utils/errores';
-import { formatoFecha, plural, textoSerie, valorDe } from '../../core/utils/formato';
+import { formatoFecha, plural, textoSerie } from '../../core/utils/formato';
 import { armarSerieReal, Modo, modoDeTipo, SerieEscrita } from '../../core/utils/validaciones';
+import { CampoNumericoComponent } from '../../shared/components/campo-numerico/campo-numerico.component';
 import { CompasComponent } from '../../shared/components/compas/compas.component';
 import { SelectorEjercicioComponent } from '../../shared/components/selector-ejercicio/selector-ejercicio.component';
-import { estadosDeEjercicio } from '../../core/utils/veredicto';
+import { estadosDeEjercicio, frase, lineasDeBalance, simboloDe, titularDeBalance } from '../../core/utils/veredicto';
 
-interface Fila {
-  tipo: 'hecha' | 'pendiente' | 'entrada';
-  orden: number;
-  serie: SerieDeSesion | null;
+interface RegistroReciente {
+  ejercicio: number;
+  veredicto: Veredicto;
+  texto: string;
 }
 
 const texto = (n: number | null | undefined): string => (n === null || n === undefined ? '' : String(n));
+const vacia = (): SerieEscrita => ({ repeticiones: '', carga: '', duracion: '' });
 
 @Component({
   selector: 'app-entrenar',
   templateUrl: './entrenar.page.html',
   styleUrl: './entrenar.page.scss',
-  imports: [IonContent, IonInput, IonButton, IonSpinner, RouterLink, CompasComponent],
+  imports: [IonContent, IonButton, IonSpinner, RouterLink, CompasComponent, CampoNumericoComponent],
 })
 export class EntrenarPage {
   private readonly sesiones = inject(SesionesService);
@@ -42,6 +44,11 @@ export class EntrenarPage {
   readonly catalogo = signal<Map<string, Ejercicio>>(new Map());
   readonly borradores = signal<Record<number, SerieEscrita>>({});
 
+  readonly abierto = signal<number | null>(null); 
+  readonly extra = signal<number | null>(null); 
+  readonly registro = signal<RegistroReciente | null>(null);
+  readonly cierre = signal<Sesion | null>(null); 
+
   readonly cargando = signal(true);
   readonly errorCarga = signal<string | null>(null);
   readonly error = signal<string | null>(null);
@@ -49,7 +56,14 @@ export class EntrenarPage {
   readonly trabajando = signal(false);
   readonly registrando = signal<number | null>(null);
   readonly iniciando = signal<string | null>(null);
-  readonly terminado = signal<string | null>(null);
+
+  readonly limites = LIMITES;
+  readonly textoSerie = textoSerie;
+  readonly frase = frase;
+  readonly simbolo = simboloDe;
+  readonly formatoFecha = formatoFecha;
+  readonly estadosDe = (e: EjercicioDeSesion) => estadosDeEjercicio(e, true);
+  readonly estadosFin = (e: EjercicioDeSesion) => estadosDeEjercicio(e, false);
 
   readonly titulo = computed(() => this.sesion()?.nombreRutina ?? 'Entrenamiento libre');
   readonly fecha = computed(() => {
@@ -57,9 +71,24 @@ export class EntrenarPage {
     return s ? formatoFecha(s.fechaSesion) : '';
   });
 
-  readonly textoSerie = textoSerie;
-  readonly estadosDe = (e: EjercicioDeSesion) => estadosDeEjercicio(e, true);
-  readonly valorDe = valorDe;
+  readonly activo = computed<EjercicioDeSesion | null>(() => {
+    const s = this.sesion();
+    if (!s) return null;
+    const elegido = s.ejercicios.find((e) => e.orden === this.abierto());
+    return elegido ?? s.ejercicios.find((e) => this.necesitaAtencion(e)) ?? s.ejercicios.at(-1) ?? null;
+  });
+
+  // ---- pantalla de cierre ----
+
+    readonly titularCierre = computed(() => {
+    const b = this.cierre()?.balance;
+    return b ? titularDeBalance(b) : '';
+  });
+
+  readonly lineasCierre = computed(() => {
+    const b = this.cierre()?.balance;
+    return b ? lineasDeBalance(b) : [];
+  });
 
   ionViewWillEnter(): void {
     this.cargar();
@@ -78,7 +107,8 @@ export class EntrenarPage {
         next: ({ sesion, catalogo, rutinas }) => {
           this.catalogo.set(new Map(catalogo.map((e) => [e.id, e])));
           this.rutinas.set(rutinas);
-          this.fijar(sesion);
+          if (sesion) this.cierre.set(null);
+          this.aplicar(sesion);
         },
         error: (e) => this.errorCarga.set(mensajeDeError(e)),
       });
@@ -88,13 +118,13 @@ export class EntrenarPage {
 
   iniciar(rutinaId?: string): void {
     this.error.set(null);
-    this.terminado.set(null);
+    this.cierre.set(null);
     this.iniciando.set(rutinaId ?? 'libre');
     this.sesiones
       .iniciar(rutinaId)
       .pipe(finalize(() => this.iniciando.set(null)))
       .subscribe({
-        next: (s) => this.fijar(s),
+        next: (s) => this.aplicar(s),
         error: (e) => this.error.set(mensajeDeError(e)),
       });
   }
@@ -117,55 +147,74 @@ export class EntrenarPage {
     return modoDeTipo(this.catalogo().get(ejercicioId)?.tipoMedicion);
   }
 
-  hechas(e: EjercicioDeSesion): number {
-    return e.series.filter((s) => s.completada).length;
-  }
-
   detalleDe(e: EjercicioDeSesion): string {
     if (e.omitido) return 'Omitido';
     if (e.series.length === 0) return 'Sin series todavía';
-    return `${this.hechas(e)} de ${plural(e.series.length, 'serie', 'series')}`;
+    const hechas = e.series.filter((s) => s.completada).length;
+    return `${hechas} de ${plural(e.series.length, 'serie', 'series')}`;
   }
 
-  filas(e: EjercicioDeSesion): Fila[] {
-    const activa = e.series.find((s) => !s.completada)?.orden ?? null;
-    const filas: Fila[] = e.series.map((s) => ({
-      tipo: s.orden === activa ? 'entrada' : s.completada ? 'hecha' : 'pendiente',
-      orden: s.orden,
-      serie: s,
-    }));
-    if (activa === null) filas.push({ tipo: 'entrada', orden: e.series.length + 1, serie: null });
-    return filas;
+  serieActiva(e: EjercicioDeSesion): SerieDeSesion | null {
+    return e.series.find((s) => !s.completada) ?? null;
   }
 
-  difiere(s: SerieDeSesion): boolean {
-    const o = s.objetivo;
-    if (!o) return false;
-    return (
-      (o.repeticiones !== null && o.repeticiones !== s.repeticiones) ||
-      (o.carga !== null && o.carga !== s.carga) ||
-      (o.duracionSegundos !== null && o.duracionSegundos !== s.duracionSegundos)
-    );
+  esLibre(e: EjercicioDeSesion): boolean {
+    return e.series.every((s) => s.objetivo === null);
+  }
+
+  necesitaAtencion(e: EjercicioDeSesion): boolean {
+    return !e.omitido && (e.series.length === 0 || e.series.some((s) => !s.completada));
+  }
+
+  mostrarEntrada(e: EjercicioDeSesion): boolean {
+    return this.serieActiva(e) !== null || this.esLibre(e) || this.extra() === e.orden;
+  }
+
+  numeroSerie(e: EjercicioDeSesion): number {
+    return this.serieActiva(e)?.orden ?? e.series.length + 1;
+  }
+
+  tituloSerie(e: EjercicioDeSesion): string {
+    const activa = this.serieActiva(e);
+    return activa ? `Serie ${activa.orden} de ${e.series.length}` : `Serie ${e.series.length + 1}`;
+  }
+
+  textoSinObjetivo(e: EjercicioDeSesion): string {
+    if (!this.esLibre(e)) return 'Serie extra, fuera del plan.';
+    return e.series.length === 0 ? 'Sin objetivo: registrá lo que hagas.' : 'Sin objetivo.';
+  }
+
+  siguiente(e: EjercicioDeSesion): EjercicioDeSesion | null {
+    const s = this.sesion();
+    if (!s) return null;
+    return s.ejercicios.find((x) => x.orden > e.orden && this.necesitaAtencion(x)) ?? null;
+  }
+
+  abrir(orden: number): void {
+    this.abierto.set(orden);
+    this.extra.set(null);
+    this.registro.set(null);
+    this.errorSerie.set(null);
   }
 
   // ---- registrar ----
 
-  cambiar(orden: number, campo: keyof SerieEscrita, ev: Event): void {
-    const valor = valorDe(ev);
-    this.borradores.update((b) => ({ ...b, [orden]: { ...b[orden], [campo]: valor } }));
+  escribir(orden: number, campo: keyof SerieEscrita, valor: string): void {
+    this.borradores.update((b) => ({ ...b, [orden]: { ...(b[orden] ?? vacia()), [campo]: valor } }));
   }
 
   registrar(e: EjercicioDeSesion): void {
     const s = this.sesion();
     if (!s) return;
-    const escrita = this.borradores()[e.orden] ?? { repeticiones: '', carga: '', duracion: '' };
-    const { datos, aviso } = armarSerieReal(this.modoDe(e.ejercicioId), escrita);
+    const { datos, aviso } = armarSerieReal(this.modoDe(e.ejercicioId), this.borradores()[e.orden] ?? vacia());
     if (!datos) {
       this.errorSerie.set({ orden: e.orden, mensaje: aviso ?? 'Revisá los datos de la serie.' });
       return;
     }
     this.errorSerie.set(null);
+    this.registro.set(null);
     this.registrando.set(e.orden);
+    const ordenSerie = this.numeroSerie(e); 
 
     this.sesiones
       .registrarSerie(s.id, e.orden, datos)
@@ -174,7 +223,13 @@ export class EntrenarPage {
         finalize(() => this.registrando.set(null)),
       )
       .subscribe({
-        next: (nueva) => this.fijar(nueva, e.orden),
+        next: (nueva) => {
+          this.aplicar(nueva, e.orden);
+          this.extra.set(null);
+          this.abierto.set(e.orden);  
+          const serie = nueva.ejercicios.find((x) => x.orden === e.orden)?.series.find((x) => x.orden === ordenSerie);
+          if (serie) this.registro.set({ ejercicio: e.orden, veredicto: serie.veredicto, texto: frase(serie) });
+        },
         error: (err) => this.errorSerie.set({ orden: e.orden, mensaje: mensajeDeError(err) }),
       });
   }
@@ -193,7 +248,11 @@ export class EntrenarPage {
         finalize(() => this.trabajando.set(false)),
       )
       .subscribe({
-        next: (nueva) => this.fijar(nueva, e.orden),
+        next: (nueva) => {
+          this.aplicar(nueva, e.orden);
+          this.abierto.set(null); 
+          this.registro.set(null);
+        },
         error: (err) => this.error.set(mensajeDeError(err)),
       });
   }
@@ -216,27 +275,51 @@ export class EntrenarPage {
       .agregarEjercicio(s.id, data.id)
       .pipe(finalize(() => this.trabajando.set(false)))
       .subscribe({
-        next: (nueva) => this.fijar(nueva),
+        next: (nueva) => {
+          this.aplicar(nueva);
+          this.abrir(nueva.ejercicios.length); 
+        },
         error: (err) => this.error.set(mensajeDeError(err)),
       });
   }
 
-  finalizar(): void {
+  async finalizar(): Promise<void> {
     const s = this.sesion();
     if (!s) return;
+    const pendientes = s.balance.sinHacer;
+    if (pendientes > 0) {
+      const alerta = await this.alertas.create({
+        header: '¿Finalizar el entrenamiento?',
+        message: `Te quedaron ${plural(pendientes, 'serie', 'series')} del plan sin hacer. Se guardan como no hechas.`,
+        buttons: [
+          { text: 'Seguir entrenando', role: 'cancel' },
+          { text: 'Finalizar', role: 'confirm' },
+        ],
+      });
+      await alerta.present();
+      const { role } = await alerta.onDidDismiss();
+      if (role !== 'confirm') return;
+    }
+    this.finalizarYa(s.id);
+  }
+
+  private finalizarYa(id: string): void {
     this.error.set(null);
     this.trabajando.set(true);
     this.sesiones
-      .finalizar(s.id)
+      .finalizar(id)
       .pipe(finalize(() => this.trabajando.set(false)))
       .subscribe({
         next: (fin) => {
-          const hechas = fin.ejercicios.reduce((n, e) => n + this.hechas(e), 0);
-          this.terminado.set(`Entrenamiento guardado: ${plural(hechas, 'serie completada', 'series completadas')}.`);
-          this.fijar(null);
+          this.cierre.set(fin);
+          this.aplicar(null);
         },
         error: (err) => this.error.set(mensajeDeError(err)),
       });
+  }
+
+  cerrarResumen(): void {
+    this.cierre.set(null);
   }
 
   async confirmarAbandonar(): Promise<void> {
@@ -260,15 +343,20 @@ export class EntrenarPage {
       .abandonar(s.id)
       .pipe(finalize(() => this.trabajando.set(false)))
       .subscribe({
-        next: () => this.fijar(null),
+        next: () => this.aplicar(null),
         error: (err) => this.error.set(mensajeDeError(err)),
       });
   }
 
   // ---- estado interno ----
 
-  private fijar(s: Sesion | null, reiniciar?: number): void {
-    if (s?.id !== this.sesion()?.id) this.borradores.set({});
+  private aplicar(s: Sesion | null, reiniciar?: number): void {
+    if (s?.id !== this.sesion()?.id) {
+      this.borradores.set({});
+      this.abierto.set(null);
+      this.extra.set(null);
+      this.registro.set(null);
+    }
     this.sesion.set(s);
     if (!s) return;
     this.borradores.update((b) => {

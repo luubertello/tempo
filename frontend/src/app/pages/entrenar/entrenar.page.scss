@@ -1,4 +1,5 @@
 @use '../../shared/styles/pantalla';
+@use '../../shared/styles/veredicto';
 
 .pantalla {
   padding-bottom: 4rem;
@@ -19,12 +20,6 @@
   color: var(--tempo-tinta-suave);
 }
 
-.logro {
-  margin: -0.5rem 0 1.25rem;
-  color: var(--tempo-acento);
-  font-weight: 600;
-}
-
 .vacio {
   margin: 0 0 1.5rem;
   color: var(--tempo-tinta-suave);
@@ -37,6 +32,32 @@ button.fila {
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+// ---- veredictos: se dicen con símbolo y palabras; el color solo refuerza ----
+
+.veredicto,
+.feedback {
+  --color-v: var(--tempo-tinta-suave);
+  color: var(--color-v);
+  font-weight: 600;
+
+  &[data-v='CUMPLIDA'],
+  &[data-v='SUPERADA'] {
+    --color-v: color-mix(in srgb, var(--tempo-ok) 72%, var(--tempo-tinta));
+  }
+  &[data-v='POR_DEBAJO'] {
+    --color-v: color-mix(in srgb, var(--tempo-aviso) 62%, var(--tempo-tinta));
+  }
+  &[data-v='DISTINTA'] {
+    --color-v: var(--tempo-tinta);
+  }
+}
+
+.simbolo {
+  display: inline-block;
+  min-width: 1.1em;
+  font-weight: 700;
 }
 
 // ---- ejercicios ----
@@ -55,16 +76,23 @@ button.fila {
     border-bottom: 1px solid var(--tempo-linea);
   }
 
-  &.omitido .titulo-ejercicio h2 {
+  &.omitido .nombre {
     color: var(--tempo-tinta-suave);
   }
 }
 
-.cabecera {
+.fila-ejercicio {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .orden {
@@ -72,6 +100,13 @@ button.fila {
   font-family: var(--tempo-fuente-titulo);
   font-weight: 700;
   color: var(--tempo-tinta-suave);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .titulo-ejercicio {
@@ -85,23 +120,36 @@ button.fila {
   }
 }
 
-// ---- series ----
+.zona-feedback {
+  min-height: 0;
+}
+
+.feedback {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-left: 3px solid var(--color-v);
+  background: color-mix(in srgb, var(--color-v) 10%, transparent);
+  border-radius: 0 var(--tempo-radio-control) var(--tempo-radio-control) 0;
+}
+
+// ---- series ya hechas y pendientes ----
+
+.lista-series {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
 
 .serie {
   display: grid;
-  grid-template-columns: 2rem 1fr;
+  grid-template-columns: 1.75rem auto 1fr;
   align-items: baseline;
   gap: 0.5rem;
-  padding: 0.4rem 0;
+  padding: 0.35rem 0;
   font-variant-numeric: tabular-nums;
 
-  &.pendiente {
-    color: var(--tempo-tinta-suave);
-  }
-
-  &.entrada {
-    align-items: start;
-    padding: 0.6rem 0;
+  &.actual {
+    font-weight: 600;
   }
 }
 
@@ -112,63 +160,104 @@ button.fila {
 
 .valor {
   font-weight: 600;
-}
 
-.serie.pendiente .valor {
-  font-weight: 400;
-}
-
-.nota {
-  margin-left: 0.5rem;
-  color: var(--tempo-tinta-suave);
-  font-size: 0.85rem;
-  font-weight: 400;
-}
-
-.entrada-cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-
-  .nota {
-    margin-left: 0;
+  &.pendiente {
+    grid-column: 2 / 3;
+    color: var(--tempo-tinta-suave);
+    font-weight: 400;
   }
+}
+
+.veredicto {
+  font-size: 0.9rem;
+}
+
+.ahora {
+  color: var(--tempo-acento);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+// ---- la serie que toca registrar ----
+
+.tarjeta-serie {
+  padding: 1.1rem 1rem 1rem;
+  border: 1px solid var(--tempo-linea);
+  border-radius: var(--tempo-radio-hoja);
+  background: var(--tempo-superficie);
+
+  h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+}
+
+.objetivo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--tempo-linea);
+}
+
+.etiqueta {
+  color: var(--tempo-tinta-suave);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.objetivo-valor {
+  font-family: var(--tempo-fuente-titulo);
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sin-objetivo {
+  margin: 0 0 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--tempo-linea);
+  color: var(--tempo-tinta-suave);
 }
 
 .campos {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.5rem;
-
-  &.dos {
-    grid-template-columns: 1fr 1fr;
-  }
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-ion-input {
-  --background: var(--tempo-superficie);
-  --border-color: var(--tempo-linea);
-  --border-radius: var(--tempo-radio-control);
-  --highlight-color-focused: var(--tempo-acento);
-  --padding-start: 12px;
-  --padding-end: 12px;
-  min-height: 52px;
-  font-size: 1.1rem;
-  font-variant-numeric: tabular-nums;
+.listo {
+  padding: 1rem 0 0.25rem;
+
+  p {
+    margin: 0 0 0.75rem;
+    font-weight: 600;
+  }
 }
 
 ion-button.registrar {
   --background: var(--tempo-acento);
   --color: var(--tempo-acento-sobre);
   --border-radius: var(--tempo-radio-control);
-  height: 2.75rem;
+  height: 3.25rem;
   margin: 0;
+  font-size: 1rem;
   font-weight: 600;
+}
+
+ion-button.secundario {
+  --color: var(--tempo-acento);
+  margin: 0.25rem 0 0 -0.5rem;
 }
 
 ion-button.omitir {
   --color: var(--tempo-tinta-suave);
-  margin-left: -0.5rem;
+  margin: 0.5rem 0 0 -0.5rem;
 }
 
 ion-button.agregar {
@@ -186,7 +275,29 @@ ion-button.abandonar {
 }
 
 .error-accion {
-  margin: 0 0 1rem;
+  margin: 0.75rem 0 1rem;
   color: var(--tempo-error);
   font-size: 0.9rem;
+}
+
+// ---- cierre ----
+
+.titular {
+  margin: 0.25rem 0 1.25rem;
+  font-size: 2.4rem;
+}
+
+.balance {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+
+  li {
+    padding: 0.2rem 0;
+    font-size: 1.05rem;
+  }
+}
+
+.cierre-ejercicios {
+  margin-bottom: 1.5rem;
 }
