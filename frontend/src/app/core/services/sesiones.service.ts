@@ -115,7 +115,6 @@ export class SesionesService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_URL}/sesiones`;
 
-  // El back responde 404 cuando no hay entrenamiento en curso: acá eso es "null", no un error.
   enCurso(): Observable<Sesion | null> {
     return this.http.get<SesionApi>(`${this.base}/en-curso`).pipe(
       map(aSesion),
@@ -131,7 +130,6 @@ export class SesionesService {
     return this.http.post<SesionApi>(this.base, rutinaId ? { rutina_id: rutinaId } : {}).pipe(map(aSesion));
   }
 
-  // Nace finalizada. Si trae rutina, el back copia el objetivo por posición.
   registrarPasada(d: DatosSesionPasada): Observable<Sesion> {
     return this.http
       .post<SesionApi>(`${this.base}/pasadas`, {
@@ -155,7 +153,6 @@ export class SesionesService {
     return this.http.post<SesionApi>(`${this.base}/${id}/ejercicios`, { ejercicio_id: ejercicioId }).pipe(map(aSesion));
   }
 
-  // Registrar siempre significa "se hizo": completa la primera serie pendiente o agrega una extra.
   registrarSerie(id: string, orden: number, datos: DatosSerie): Observable<void> {
     return this.http
       .post(`${this.base}/${id}/ejercicios/${orden}/series`, {
@@ -178,7 +175,6 @@ export class SesionesService {
     return this.http.post<SesionApi>(`${this.base}/${id}/abandonar`, {}).pipe(map(aSesion));
   }
 
-  // Más recientes primero (lo ordena el back).
   listar(estado?: EstadoSesion): Observable<ResumenSesion[]> {
     return this.http.get<ResumenApi[]>(this.base, { params: estado ? { estado } : {} }).pipe(
       map((lista) =>
@@ -196,7 +192,6 @@ export class SesionesService {
     );
   }
 
-  // Con "datos" pisa los valores reales; con completada = false la marca como no hecha.
   corregirSerie(
     id: string,
     ordenEjercicio: number,
