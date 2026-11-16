@@ -66,6 +66,7 @@
                       [error]="error_(c + '.repeticiones')" (valorChange)="cambiarBase(i, 'repeticiones', $event)" />
                     <app-campo-numerico etiqueta="Carga (opcional)" unidad="kg" [paso]="2.5" [minimo]="0.5"
                       [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="e.base.carga"
+                      ayuda="Si la dejás vacía, elegís el peso cuando entrenás."
                       [error]="error_(c + '.carga')" (valorChange)="cambiarBase(i, 'carga', $event)" />
                   }
                   @case ('reps') {

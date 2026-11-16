@@ -100,6 +100,7 @@
                           (valorChange)="escribir(e.orden, 'repeticiones', $event)" />
                         <app-campo-numerico etiqueta="Carga" unidad="kg" [paso]="2.5" [minimo]="0.5"
                           [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="b?.carga ?? ''"
+                          [ayuda]="ayudaCarga(e)"
                           (valorChange)="escribir(e.orden, 'carga', $event)" />
                       }
                       @case ('reps') {

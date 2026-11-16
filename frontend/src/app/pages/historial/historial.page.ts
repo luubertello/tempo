@@ -30,7 +30,6 @@ export class HistorialPage {
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
 
-  // Un día cuenta como entrenado si tiene al menos un entrenamiento finalizado.
   readonly entrenados = computed(
     () => new Set(this.todas().filter((s) => s.estado === 'FINALIZADA').map((s) => s.fechaSesion)),
   );
@@ -44,7 +43,6 @@ export class HistorialPage {
     return lista;
   });
 
-  // Solo se ofrece cargar días que ya pasaron.
   readonly diaPasadoElegido = computed(() => {
     const dia = this.diaElegido();
     return dia !== null && dia < this.hoy();
@@ -52,7 +50,6 @@ export class HistorialPage {
 
   readonly formatoFecha = formatoFecha;
 
-  // Ionic conserva las pantallas de las pestañas: se vuelve a cargar cada vez que se entra.
   ionViewWillEnter(): void {
     this.hoy.set(isoHaceDias(0));
     this.cargar();
@@ -74,7 +71,6 @@ export class HistorialPage {
     this.filtro.set((evento as CustomEvent).detail.value as Filtro);
   }
 
-  // Tocar el día elegido de nuevo lo deselecciona.
   elegirDia(iso: string): void {
     this.diaElegido.set(this.diaElegido() === iso ? null : iso);
   }
@@ -87,7 +83,6 @@ export class HistorialPage {
     return `${plural(s.cantidadEjercicios, 'ejercicio', 'ejercicios')}, ${plural(s.seriesCompletadas, 'serie completada', 'series completadas')}`;
   }
 
-  // Un entrenamiento en curso se retoma desde Entrenar; el resto se abre en el detalle.
   destino(s: ResumenSesion): string[] {
     return s.estado === 'EN_CURSO' ? ['/entrenar'] : ['/historial', s.id];
   }

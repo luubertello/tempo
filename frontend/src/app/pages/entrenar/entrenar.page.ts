@@ -348,6 +348,11 @@ export class EntrenarPage {
       });
   }
 
+  ayudaCarga(e: EjercicioDeSesion): string | null {
+    const objetivo = this.serieActiva(e)?.objetivo;
+    return objetivo && objetivo.carga === null ? 'Tu rutina no tenía peso planificado: cargá el que usaste.' : null;
+  }
+  
   // ---- estado interno ----
 
   private aplicar(s: Sesion | null, reiniciar?: number): void {

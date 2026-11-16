@@ -71,6 +71,7 @@
             @for (s of e.series; track $index; let j = $index) {
               @let k = 'e' + i + '.s' + j;
               @let activa = s.hecha && !e.omitido;
+              @let plan = planDe(i, j);
               <div class="serie-fila">
                 <div class="serie-cab">
                   <span class="serie-num">Serie {{ j + 1 }}</span>
@@ -100,6 +101,7 @@
                           [error]="error_(k + '.repeticiones')" (valorChange)="cambiar(i, j, 'repeticiones', $event)" />
                         <app-campo-numerico etiqueta="Carga" unidad="kg" [paso]="2.5" [minimo]="0.5"
                           [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="s.carga"
+                          [ayuda]="plan && plan.carga === null ? 'Tu rutina no tenía peso planificado: cargá el que usaste.' : null"
                           [error]="error_(k + '.carga')" (valorChange)="cambiar(i, j, 'carga', $event)" />
                       }
                       @case ('reps') {

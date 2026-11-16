@@ -12,7 +12,7 @@
         [attr.inputmode]="decimales() ? 'decimal' : 'numeric'"
         [attr.aria-label]="nombreAccesible()"
         [attr.aria-invalid]="error() ? 'true' : null"
-        [attr.aria-describedby]="error() ? id + '-error' : null"
+        [attr.aria-describedby]="error() ? id + '-error' : ayuda() ? id + '-ayuda' : null"
         [value]="valor()"
         [disabled]="deshabilitado()"
         (input)="escribir($event)"
@@ -28,5 +28,7 @@
   </div>
   @if (error(); as mensaje) {
     <p class="error" [id]="id + '-error'" role="alert">{{ mensaje }}</p>
+  } @else if (ayuda(); as texto) {
+    <p class="ayuda" [id]="id + '-ayuda'">{{ texto }}</p>
   }
 </div>

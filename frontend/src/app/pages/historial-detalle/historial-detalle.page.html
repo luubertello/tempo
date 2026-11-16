@@ -87,6 +87,7 @@
                               (valorChange)="fijar('repeticiones', $event)" />
                             <app-campo-numerico etiqueta="Carga" unidad="kg" [paso]="2.5" [minimo]="0.5"
                               [maximo]="limites.CARGA_MAX_KG" [decimales]="true" [valor]="borrador().carga"
+                              [ayuda]="x.objetivo && x.objetivo.carga === null ? 'Tu rutina no tenía peso planificado: cargá el que usaste.' : null"
                               (valorChange)="fijar('carga', $event)" />
                           }
                           @case ('reps') {
